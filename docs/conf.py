@@ -67,7 +67,10 @@ except Exception as e:
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-
+#try:
+   # import sphinx_rtd_theme
+#except Exception as e:
+    print("Importing RTD theme for sphinx failed\n{}".format(e))
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.intersphinx",

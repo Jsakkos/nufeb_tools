@@ -23,7 +23,14 @@ class NUFEB_data:
         self.sucRatio = int(self.directory.split('_')[-2])
         if self.directory:
             self.get_local_data()
+        self.timepoints = [key for key in self.h5['concentration']['co2'].keys()]
+        self.timepoints.sort(key=int)
+        self.dims = self.h5['concentration']['co2']['0'].shape
+        self.numsteps = len(self.timepoints)
     def get_local_data(self):
+        """
+        Collect NUFEB simulation data from a local directory
+        """
         self.h5 = h5py.File(os.path.join(self.directory,'trajectory.h5'))
         self.biomass = pd.read_csv(os.path.join(
             self.directory,'Results','biomass.csv'),
@@ -91,6 +98,18 @@ class NUFEB_data:
         if legend:
             ax.legend(frameon=False)
         return ax
+    def radius_key(timestep):
+        """
+        generate the appropriate key for a radius at a given timestep
+        Args:
+
+        timestep (str)
+
+        Example
+        ts='1000'
+        radius_key(ts)
+        """
+        return(f"radius{timestep}")
     
 
 
@@ -104,16 +123,10 @@ sns.set_style('white')
 x.plot_average_nutrients('Sucrose',color='Green')
 
 #%%
-# generate the appropriate key for a radius at a given timestep
-def radius_key(timestep):
-    return(f"radius{timestep}")
-# example
-ts='1000'
-radius_key(ts)
-timepoints = [k for k in f['concentration']['co2'].keys()]
-timepoints.sort(key=int)
-dims = f['concentration']['co2']['0'].shape
-numsteps = len(timepoints)
+# 
+
+
+
 print(numsteps)
 hrs = [int(x)/360 for x in timepoints]
 df = pd.DataFrame(columns=['id','type','time','biomass'])
