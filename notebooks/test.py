@@ -1,1 +1,1 @@
-from nufeb-tools.utils import generateatom
+from nufeb_tools.analysis import get_data

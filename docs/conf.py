@@ -21,6 +21,7 @@ __location__ = os.path.join(
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
+sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.join(__location__, "../src"))
 
 # -- Run sphinx-apidoc -------------------------------------------------------
@@ -82,8 +83,11 @@ extensions = [
     "sphinx.ext.ifconfig",
     "sphinx.ext.mathjax",
     "sphinx.ext.napoleon",
-    #"sphinx_rtd_theme",
+    "sphinx_rtd_theme",
 ]
+
+# Napoleon settings
+napoleon_google_docstring = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -152,15 +156,15 @@ pygments_style = "sphinx"
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = "alabaster"
-#html_theme = 'sphinx_rtd_theme'
+#html_theme = "alabaster"
+html_theme = 'sphinx_rtd_theme'
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-html_theme_options = {
-    "sidebar_width": "300px",
-    "page_width": "1200px"
-}
+#html_theme_options = {
+   # "sidebar_width": "300px",
+  #  "page_width": "1200px"
+#}
 
 # Add any paths that contain custom themes here, relative to this directory.
 # html_theme_path = []

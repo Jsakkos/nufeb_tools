@@ -1,50 +1,27 @@
-===========
-nufeb_tools
-===========
+Welcome to the **nufeb_tools** documentation.
+=============================================
 
-This is the documentation of **nufeb_tools**.
 
 .. toctree::
-   :maxdepth: 2
-   :caption: NUFEB atom generation
+   :maxdepth: 3
+   :caption: Notes
 
-   NUFEB atom generation
+   readme.rst
+   changelog.rst
+   license.rst
+
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Analysis:
+   :maxdepth: 3
+   :caption: Package Content
 
+   atom_generation
    analysis
-
-.. toctree::
-   :maxdepth: 2
-   :caption: DataFed Integration
-
-   DataFed Integration
+   datafed
 
 .. toctree::
   :maxdepth: 3
   :caption: Examples
 
   examples
-
-Contents
-========
-
-.. toctree::
-   :maxdepth: 2
-
-   Overview <readme>
-   License <license>
-   Authors <authors>
-   Changelog <changelog>
-   Module Reference <api/modules>
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
 

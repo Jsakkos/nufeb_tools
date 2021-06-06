@@ -3,10 +3,11 @@ import argparse
 import sys
 from glob import glob
 import h5py
-import dask
-import dask.array as da
-import dask.dataframe as dd
+#import dask
+#import dask.array as da
+#import dask.dataframe as dd
 from pathlib import Path
+import seaborn as sns
 
 simulation_list = next(os.walk('D:\\CADES Files\\runs\\'))[1]
 def parse_args(args):
@@ -58,10 +59,11 @@ class NUFEB_data:
         This is a function to generate growth curve plots
         
         Args:
-            ax (plt.ax)
-            Axis to plot data on
-            
-            **kwargs
+            ax:
+                Axis to plot data on
+
+            **kwargs:
+                Additional arguments to pass to plt.plot
         """
         Biomass = self.biomass
         Biomass.index = Biomass.step/60/60*10 #convert timesteps (10s) to hours
@@ -79,6 +81,22 @@ class NUFEB_data:
         ax.set_yscale('log')
         return ax
     def plot_average_nutrients(self,nutrient,ax=None,legend = None,**kwargs):
+        """
+        Function to plot the average nutrient concentration in the simulation volume over time
+
+        Args:
+            nutrient (str):
+                Name of the nutrient to plot, e.g., ``'Sucrose'``
+
+            ax:
+                Axis on which to make the plot
+
+            legend (bool):
+                Include legend in the plot
+
+            **kwargs:
+                Additional arguments to pass to plt.plot
+        """
         sns.set_context('talk')
         sns.set_style('white')
         avgc = self.avg_con
@@ -110,22 +128,23 @@ class NUFEB_data:
         return ax
     def radius_key(timestep):
         """
-        generate the appropriate key for a radius at a given timestep
-        Args:
+        Generate the appropriate key for a radius at a given timestep
 
-        timestep (str)
+        Args:
+            timestep (str):
+                The simulation timestep to get keys from
 
         Example:
 
-        ts='1000'
-        radius_key(ts)
+        >>> ts='1000'
+        >>> radius_key(ts)
         """
         return(f"radius{timestep}")
 
 
 
 def main(args):
-    """Warpper function
+    """Wrapper function
 
     Args:
       args (List[str]): command line parameters as list of strings
