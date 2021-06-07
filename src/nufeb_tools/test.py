@@ -113,7 +113,7 @@ class NUFEB_data:
     
 
 
-x = NUFEB_data()
+x = NUFEB_data(directory=r'../data/Run_98_53_11_1')
 f, axes = plt.subplots(ncols=3,nrows=2)
 for ax in axes.ravel():
     x.plot_overall_growth(ax)
