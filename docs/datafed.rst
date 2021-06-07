@@ -1,12 +1,16 @@
-DataFed Integration Scripts
-===========================
+DataFed Integration
+===================
 
-DataFed Create
---------------
-.. automodule:: nufeb_tools.datafed.Datafedcreate
-    :members:
+Verify Connection
+-----------------
+.. autofunction:: nufeb_tools.datafed.verify
 
-DataFed Verify
---------------
-.. automodule:: nufeb_tools.datafed.DatafedVerify
-    :members:
+
+Create Collection
+-----------------
+.. autofunction:: nufeb_tools.datafed.create_collection
+
+
+Upload Data
+-----------
+.. autofunction:: nufeb_tools.datafed.upload

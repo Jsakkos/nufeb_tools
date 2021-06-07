@@ -487,9 +487,6 @@ def main(args):
     f.writelines(result)
     _logger.info("Script ends here")
 
-
-
-
 def run():
     """Calls :func:`main` passing the CLI arguments extracted from :obj:`sys.argv`
 
@@ -499,14 +496,5 @@ def run():
 
 
 if __name__ == "__main__":
-    # ^  This is a guard statement that will prevent the following code from
-    #    being executed in the case someone imports this file instead of
-    #    executing it as a script.
-    #    https://docs.python.org/3/library/__main__.html
 
-    # After installing your project with pip, users can also run your Python
-    # modules as scripts via the ``-m`` flag, as defined in PEP 338::
-    #
-    #     python -m nufeb_tools.skeleton 42
-    #
     run()

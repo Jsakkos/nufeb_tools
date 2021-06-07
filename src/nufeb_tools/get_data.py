@@ -8,7 +8,7 @@ import h5py
 #import dask.dataframe as dd
 from pathlib import Path
 import seaborn as sns
-
+import pandas as pd
 simulation_list = next(os.walk('D:\\CADES Files\\runs\\'))[1]
 def parse_args(args):
     """Argument parser

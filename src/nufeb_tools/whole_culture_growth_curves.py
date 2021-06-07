@@ -2,25 +2,31 @@
 """
 Created on Fri Jun  4 11:40:31 2021
 
-@author: Jonathan
+@author: Jonathan Sakkos
 """
-
-import cv2 # for generating images to compare to the jpg dumps. main use case to verify visually I understand hdf5
+import sys
 from matplotlib import pyplot as plt  #display images notebook
 import numpy as np
-import h5py
+import argparse
 import pandas as pd
-from scipy.integrate import odeint
 from glob import glob
-import pickle
-from scipy.signal import find_peaks
 import seaborn as sns
-from PIL import Image
-from matplotlib.colors import Normalize
-from matplotlib import colors 
-from mpl_toolkits.axes_grid1 import AxesGrid
 
-def main():
+def parse_args(args):
+    """Argument parser
+
+    Args:
+      args (List(str))
+    """
+    parser = argparse.ArgumentParser(description='Get datasets')
+    parser.add_argument('--id', dest='id', action='store',
+                    help='Collection id to get data from')
+    parser.add_argument('--dir', dest='directory', action='store',
+                    help='Local directory to look for simulation data')
+
+    return parser.parse_args(args)
+
+def whole_culture_growth_curves(args):
     files = glob(r'D:\CADES Files\runs\**\biomass.csv', recursive=True)
     print(files)
     #%%
@@ -55,11 +61,22 @@ def main():
 
 
     
+def main(args):
+    """Wrapper function
+
+    Args:
+      args (List[str]): command line parameters as list of strings
+          (for example  ``["--verbose", "42"]``).
+    """
+    args = parse_args(args)
+
+    return whole_culture_growth_curves(args)
+    
 def run():
     """Calls :func:`main` passing the CLI arguments extracted from :obj:`sys.argv`
 
     """
-    main()
+    main(sys.argv[1:])
 
 
 if __name__ == "__main__":

@@ -3,7 +3,7 @@ NUFEB Simulation Analysis
 
 Analysis
 --------
-.. automodule:: nufeb_tools.analysis.get_data
+.. autoclass:: nufeb_tools.get_data.NUFEB_data
     :members:
     :undoc-members:
     :member-order: bysource
@@ -12,7 +12,7 @@ Analysis
 
 Growth Curves
 -------------
-.. automodule:: nufeb_tools.analysis.whole_culture_growth_curves
+.. automodule:: nufeb_tools.whole_culture_growth_curves
     :members:
     :undoc-members:
     :member-order: bysource
