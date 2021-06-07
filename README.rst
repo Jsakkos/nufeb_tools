@@ -1,12 +1,10 @@
-===========
 nufeb_tools
 ===========
 
 
-.. |docs| image:: https://readthedocs.org/projects/docs/badge/?version=latest
-    :alt: Documentation Status
-    :scale: 100%
-    :target: nufeb-tools.readthedocs.io/latest/?badge=latest
+.. image:: https://readthedocs.org/projects/nufeb-tools/badge/?version=latest
+:target: https://nufeb-tools.readthedocs.io/en/latest/?badge=latest
+:alt: Documentation Status
 
 Python-based tools and utilities for NUFEB simulations 
 
