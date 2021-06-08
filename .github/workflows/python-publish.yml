@@ -32,7 +32,7 @@ jobs:
     - name: Test with tox
       run: tox
     - name: Build package
-      run: python -m build
+      run: tox -e build
     - name: Publish distribution build to Test PyPI
       uses: pypa/gh-action-pypi-publish@master
       with:
