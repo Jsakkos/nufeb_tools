@@ -80,7 +80,49 @@ class get_data:
         >>> radius_key(ts)
         """
         return(f"radius{timestep}")
+    def single_cell_growth(self,timepoint=0):
+        """
+        Extract single cell biomass over time from the HDF5 data. 
+
+        Args:
+            timepoint (int):
+            The simulation timestep to calculate from. Default = 0.
+        """
+        self.hrs = [int(x)/360 for x in self.timepoints]
+        df = pd.DataFrame(columns=['id','type','time','biomass'])
+        # loop over all cell ids, c, from time = 0
+        for c in self.h5['id'][str(timepoint)]:
+            # loop over all timepoints t
+            for t,h in zip(self.timepoints,self.hrs):
+                # get list of ids from timepoint t
+                ids = self.h5['id'][t]
+                arr = ids.__array__(ids.dtype)
+                # make sure cell id matches id of interest
+                i = np.where(arr == c)[0][0]
+                # get radius
+                radius = self.h5[self.radius_key(t)][i]
+                volume = 4/3*np.pi*radius**3 #volume in m^3
+                # get celltype
+                celltype=self.h5['type'][t][i]
+                # color cells
+                if celltype==1:
+                    color = '#2ca25f'
+                    mass = volume*370*1e18 # convert mass in kg to fg
+                elif celltype ==2:
+                    color = '#de2d26'
+                    mass = volume*236*1e18
+                elif celltype ==0:
+                    print('Celltype is 0',i,c,celltype)
+                # append data to a dataframe
+                df = df.append(pd.DataFrame([[c,celltype,h,mass]],columns=['id','type','time','biomass']),ignore_index=True)
+        self.single_cell_biomass = df
 def download_test_data(urls=urls):
+    """
+    Get an example dataset from the Github repo. Downloads to "home/.nufeb_tools/data"
+
+    Args:
+        urls (List(str))
+    """
     # nufeb_tools directory
     cp_dir = Path.home().joinpath('.nufeb_tools')
     cp_dir.mkdir(exist_ok=True)

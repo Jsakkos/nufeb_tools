@@ -7,7 +7,6 @@ Welcome to the **nufeb_tools** documentation.
    :caption: Notes
 
    readme.rst
-   changelog.rst
    license.rst
 
 
