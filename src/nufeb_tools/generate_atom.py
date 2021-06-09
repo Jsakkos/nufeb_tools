@@ -5,11 +5,16 @@ import pickle
 from string import Template
 import json # For dealing with metadata
 import os # For file level operations
+import sys
 import time # For timing demonstrations
 import datetime # To demonstrate conversion between date and time formats
 from datafed.CommandLib import API
+import importlib.resources
 import logging
 from nufeb_tools import __version__
+from pathlib import Path
+
+
 
 __author__ = "Jonathan Sakkos"
 __copyright__ = "Jonathan Sakkos"
@@ -89,6 +94,14 @@ def setup_logging(loglevel):
         level=loglevel, stream=sys.stdout, format=logformat, datefmt="%Y-%m-%d %H:%M:%S"
     )
 
+def clean():
+    if os.path.isdir('runs'):
+        import shutil
+        try:
+            shutil.rmtree('runs')
+        except OSError as e:
+            print("Error: %s : %s" % ('runs', e.strerror))
+
 def main(args):
     """Wrapper function to generate new NUFEB simulation conditions
 
@@ -98,14 +111,14 @@ def main(args):
     """
     args = parse_args(args)
     setup_logging(args.loglevel)
-    _logger.debug("Generating NUFEB simulation files")
+    _logger.info("Generating NUFEB simulation files")
     # maximum growth rates, mu
     mu_cyanos = round(0.06/3600,7)
     mu_ecw = 2.7e-04
     # molecular weights of co2 and sucrose for unit conversions
     CO2MW = 44.01
     SucMW = 342.3
-
+    TEMPLATES_DIR = (Path(__file__).parent) / 'templates'
     # check for runs folder
     if not os.path.isdir('runs'):
         os.mkdir('runs')
@@ -231,7 +244,8 @@ def main(args):
         dumpfile.close()
         #write Inputscript
         #open the file
-        filein = open( './templates/Inputscript.txt' )
+        #filein = importlib.resources.read_text("nufeb_tools.templates", "Inputscript.txt")
+        filein = open( TEMPLATES_DIR / 'Inputscript.txt' )
         #read it
         src = Template( filein.read() )
         #do the substitution
@@ -265,7 +279,8 @@ def main(args):
 
         #write slurm script
         #open the file
-        filein = open( './templates/Slurm.txt' )
+        filein = open( TEMPLATES_DIR / 'Slurm.txt' )
+        #filein = importlib.resources.read_text("nufeb_tools.templates", "Slurm.txt")
         #read it
         src = Template( filein.read() )
         #do the substitution
@@ -277,7 +292,8 @@ def main(args):
         f.writelines(result)
         #write local run script
         #open the file
-        filein = open( './templates/local.txt' )
+        filein = open( TEMPLATES_DIR / 'local.txt' )
+        #filein = importlib.resources.read_text("nufeb_tools.templates", "local.txt")
         #read it
         src = Template( filein.read() )
         #do the substitution

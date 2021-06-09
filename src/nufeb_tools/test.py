@@ -114,13 +114,13 @@ class NUFEB_data:
 
 
 x = NUFEB_data(directory=r'../data/Run_98_53_11_1')
-f, axes = plt.subplots(ncols=3,nrows=2)
-for ax in axes.ravel():
-    x.plot_overall_growth(ax)
-f, ax = plt.subplots()
-sns.set_context('talk')
-sns.set_style('white')
-x.plot_average_nutrients('Sucrose',color='Green')
+    f, axes = plt.subplots(ncols=3,nrows=2)
+    for ax in axes.ravel():
+        x.plot_overall_growth(ax)
+    f, ax = plt.subplots()
+    sns.set_context('talk')
+    sns.set_style('white')
+    x.plot_average_nutrients('Sucrose',color='Green')
 
 #%%
 # 

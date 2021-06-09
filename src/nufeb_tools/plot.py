@@ -1,11 +1,15 @@
-def plot_overall_growth(df,ax=None, **kwargs):
+import seaborn as sns
+import pandas as pd
+import matplotlib.pyplot as plt
+
+def overall_growth(df,ax=None, **kwargs):
     """
     This is a function to generate growth curve plots
     
     Args:
         df (pd.DataFrame):
         Pandas Dataframe containing biomass data over time
-        
+
         ax (plt.ax):
             Axis to plot data on
         
@@ -26,10 +30,30 @@ def plot_overall_growth(df,ax=None, **kwargs):
     #axs[i].legend(frameon=False)
     ax.set_yscale('log')
     return ax
-def plot_average_nutrients(self,nutrient,ax=None,legend = None,**kwargs):
+    
+def average_nutrients(df,nutrient,ax=None,legend = None,**kwargs):
+    """
+    This is a function to plot the nutrient concentration over time
+    
+    Args:
+        df (pd.DataFrame):
+        Pandas Dataframe containing nutrient data
+
+        nutrient (str):
+            Name of the nutrient to plot, e.g., ``'Sucrose'``
+
+        ax:
+            Axis on which to make the plot
+
+        legend (bool):
+            Include legend in the plot
+
+        **kwargs:
+            Additional arguments to pass to plt.plot
+    """
     sns.set_context('talk')
     sns.set_style('white')
-    avgc = self.avg_con
+    avgc = df
     avgc.index = avgc.Time/60/60*10 #convert timesteps (10s) to hours
     avgc.index.name='Hours'
     avgc.drop('Time',inplace=True,axis=1)

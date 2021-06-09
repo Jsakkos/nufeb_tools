@@ -17,7 +17,8 @@ import itertools
 from collections import defaultdict
 import sys
 import logging
-
+from importlib import resources
+from pathlib import Path
 from nufeb_tools import __version__
 
 __author__ = "Jonathan Sakkos"
@@ -331,16 +332,25 @@ class Culture:
                     cleared = False
         return
 
+def clean():
+    if os.path.isdir('runs'):
+        import shutil
+        try:
+            shutil.rmtree('runs')
+        except OSError as e:
+            print("Error: %s : %s" % ('runs', e.strerror))
+
+
 def main(args):
     """Wrapper function to generate new NUFEB simulation conditions
 
     Args:
       args (List[str]): command line parameters as list of strings
-          (for example  ``["--verbose", "42"]``).
+          
     """
     args = parse_args(args)
     setup_logging(args.loglevel)
-    _logger.debug("Starting crazy calculations...")
+    _logger.debug("Generating NUFEB simulation files")
     
     # create nutrients
     light = Nutrient(1e-1,None,None,'g','nn')
@@ -348,7 +358,7 @@ def main(args):
     o2 = Nutrient(0.28125,2.30e-9,32,'l','nn')
     sucrose = Nutrient(float(args.sucrose),5.2e-10,342.3,'l','nn')
     gco2 = Nutrient(0,None,44.01,'g','nn')
-
+    TEMPLATES_DIR = (Path(__file__).parent) / 'templates'
 
     captureRate = round(1000/args.timestep)
     # define dump parameters
@@ -411,7 +421,8 @@ def main(args):
 
         #write Inputscript
         #open the file
-        filein = open( '../templates/Bacillus.txt' )
+        filein = open( TEMPLATES_DIR / 'Bacillus.txt' )
+        #filein = resources.read_text("nufeb_tools.templates", "Bacillus.txt")
         #read it
         src = Template( filein.read() )
         #do the substitution
@@ -464,7 +475,8 @@ def main(args):
 
         #write local run script
         #open the file
-        filein = open( '../templates/local.txt' )
+        filein = open( TEMPLATES_DIR / 'local.txt' )
+        #filein = resources.read_text("nufeb_tools.templates", "local.txt")
         #read it
         src = Template( filein.read() )
         #do the substitution
@@ -475,7 +487,8 @@ def main(args):
         f.writelines(result)
     #write slurm script
     #open the file
-    filein = open( '../templates/Slurm.txt' )
+    filein = open( TEMPLATES_DIR / 'Slurm.txt' )
+    #filein = resources.read_text("nufeb_tools.templates", "Slurm.txt")
     #read it
     src = Template( filein.read() )
     #do the substitution

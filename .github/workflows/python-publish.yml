@@ -9,7 +9,7 @@
 name: Upload Python Package
 
 on:
-  push:
+  release:
     branches: [ main ]
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -32,7 +32,7 @@ jobs:
     - name: Test with tox
       run: tox
     - name: Build package
-      run: tox -e build
+      run: python -m build
     - name: Publish distribution build to Test PyPI
       uses: pypa/gh-action-pypi-publish@master
       with:

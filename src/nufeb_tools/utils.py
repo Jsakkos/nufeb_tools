@@ -1,21 +1,26 @@
 import os
-import argparse
-import sys
-from glob import glob
 import h5py
 from pathlib import Path
-import seaborn as sns
 import pandas as pd
 from datafed.CommandLib import API
+from urllib.parse import urlparse
+from urllib.request import urlretrieve
+import tarfile
+
 df_api = API()
 df_api.setContext('p/eng107')
+urls= ['https://github.com/Jsakkos/nufeb-tools/raw/main/data/Run_98_53_11_1.tar']
 
-class NUFEB_data:
+class get_data:
     """
     NUFEB simulation data class to collect results for analysis
     """
-    def __init__(self,directory,local=True,id=None):
-        self.directory = directory
+    def __init__(self,directory,local=True,id=None,test=None):
+        if test:
+            download_test_data()
+            self.directory = str((Path.home()) / '.nufeb_tools' / 'data' / 'Run_98_53_11_1')
+        else:
+            self.directory = directory
         self.local = local
         self.id = id
         self.sucRatio = int(self.directory.split('_')[-2])
@@ -75,3 +80,23 @@ class NUFEB_data:
         >>> radius_key(ts)
         """
         return(f"radius{timestep}")
+def download_test_data(urls=urls):
+    # nufeb_tools directory
+    cp_dir = Path.home().joinpath('.nufeb_tools')
+    cp_dir.mkdir(exist_ok=True)
+    data_dir = cp_dir.joinpath('data')
+    data_dir.mkdir(exist_ok=True)
+
+    for url in urls:
+        parts = urlparse(url)
+        filename = os.path.basename(parts.path)
+        cached_file = os.path.join(data_dir, filename)
+        if not os.path.exists(cached_file):
+            local_filename, headers = urlretrieve(url, cached_file)
+            tar = tarfile.open(local_filename,'r')
+            tar.extractall(path=data_dir)
+            tar.close()
+            Path(local_filename).unlink()
+
+
+
