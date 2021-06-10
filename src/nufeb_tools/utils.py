@@ -2,28 +2,37 @@ import os
 import h5py
 from pathlib import Path
 import pandas as pd
+import numpy as np
 from datafed.CommandLib import API
+import subprocess
+import sys
+import argparse
+import pickle
+import json
 from urllib.parse import urlparse
 from urllib.request import urlretrieve
 import tarfile
-
+from nufeb_tools import __version__
 df_api = API()
 df_api.setContext('p/eng107')
-urls= ['https://github.com/Jsakkos/nufeb-tools/raw/main/data/Run_98_53_11_1.tar']
+urls= ['https://github.com/Jsakkos/nufeb-tools/raw/main/data/runs.tar']
 
 class get_data:
     """
     NUFEB simulation data class to collect results for analysis
     """
-    def __init__(self,directory,local=True,id=None,test=None):
+    def __init__(self,directory,local=True,id=None,test=None,timestep=10):
         if test:
-            download_test_data()
-            self.directory = str((Path.home()) / '.nufeb_tools' / 'data' / 'Run_98_53_11_1')
+            self.directory = str((Path.home()) / '.nufeb_tools' / 'data' / 'Run_26_90_83_1')
+            if not os.path.isdir(self.directory):
+                download_test_data()
+            
         else:
             self.directory = directory
         self.local = local
         self.id = id
         self.sucRatio = int(self.directory.split('_')[-2])
+        self.timestep=timestep
         if self.local:
             self.get_local_data()
         elif self.local is not True and self.id is not None:
@@ -34,6 +43,7 @@ class get_data:
         self.timepoints.sort(key=int)
         self.dims = self.h5['concentration']['co2']['0'].shape
         self.numsteps = len(self.timepoints)
+        
     def get_local_data(self):
         """
         Collect NUFEB simulation data from a local directory
@@ -50,6 +60,22 @@ class get_data:
             delimiter='\t',
             names=['Time','O2','Sucrose','CO2'],
             skiprows=1)
+        self.convert_units_avg_con()
+        self.convert_units_biomass()
+    def convert_units_avg_con(self):
+        self.avg_con.index = self.avg_con.Time/60/60*self.timestep
+        self.avg_con.index.name='Hours'
+        self.avg_con.drop('Time',inplace=True,axis=1)
+        SucroseMW = 342.3
+        O2MW = 32
+        CO2MW = 44.01
+        self.avg_con.O2 = self.avg_con.O2/O2MW*1e3
+        self.avg_con.Sucrose = self.avg_con.Sucrose/SucroseMW*1e3
+        self.avg_con['CO2'] = self.avg_con['CO2']/CO2MW*1e3
+    def convert_units_biomass(self):
+        self.biomass.index = self.biomass.step/60/60*self.timestep
+        self.biomass.index.name='Hours'
+        self.biomass.iloc[:,1:]=self.biomass.iloc[:,1:]*1e18
     def get_datafed_data(record_id):
         """
         Collect NUFEB simulation data from a DataFed collection
@@ -66,7 +92,7 @@ class get_data:
                          )
         return get_resp
     #print(dv_resp)
-    def radius_key(timestep):
+    def radius_key(self,timestep):
         """
         Generate the appropriate key for a radius at a given timestep
 
@@ -140,5 +166,126 @@ def download_test_data(urls=urls):
             tar.close()
             Path(local_filename).unlink()
 
+def get_datafed(record_id,dir='.',orig_fname=False,wait=True):
+    get_resp = df_api.dataGet(record_id,
+                          path=dir,
+                          orig_fname=orig_fname,
+                          wait=wait,
+                         )
+
+def upload_datafed(file, title, collection_id,metadata_file):
+    """
+    Create a data collection to hold NUFEB data in DataFed
+
+    Args:
+        file (str):
+            Path of file to upload
+        title (str):
+            Name to use for file on DataFed
+        collection_id (str):
+            The identifier of the collection to store the file
+        metadata_file (str):
+            Path of the metadata file to append to the data file
+    """
+    filename = file
+    file_title= title
+    global_coll_id = collection_id
+    df_api = API()
+    if metadata_file != '':
+        pkl_file = metadata_file
+
+        with open(pkl_file, 'rb') as f:
+            metadata = pickle.load(f)
+        rec_msg = df_api.dataCreate(title = file_title,
+                                    alias = '',
+                                    metadata=json.dumps(metadata),
+                                    parent_id=global_coll_id,
+                                        )
+        rec_id = rec_msg[0].data[0].id
+        #Use as pathname the path and name of the file you wish to move from CADES to DataFed
+        pput_msg = df_api.dataPut(rec_id, filename, wait=False)
+        #_logger.info(pput_msg)
+    else:
+        #_logger.debug('No metadata file found')
+        sys.exit(1)
+
+def create_datafed_collection(n_cyanos, n_ecw, SucPct,dims):
+    """
+    Create a data collection to hold NUFEB data in DataFed
+
+    Args:
+        n_cyanos (int): 
+            Number of initial cyanobacteria
+        n_ecw (int):
+            Number of initial E. coli
+        SucPct (int):
+            Percentage of sucrose secretion activation
+        dims (List(float)):
+            x, y, z simulation boundaries
+    """
+    try:
+        df_api = API()
+        df_api.setContext('p/eng107')
+        collectionName = f'NUFEB_{n_cyanos}_{n_ecw}_{SucPct}_{dims[0]}_{dims[1]}_{dims[2]}'
+        parent_collection = df_api.getAuthUser().split('/')[1]
+        coll_msg = df_api.collectionCreate(collectionName,
+                                        parent_id=parent_collection)
+        global_coll_id = coll_msg[0].coll[0].id
+        #_logger.info(global_coll_id)
+    except:
+        global_coll_id = None
+        #_logger.debug('Unable to create collection')
+    return global_coll_id
+
+def verify_datafed_connection():
+    """
+    Verify Datafed installation and connection
+    """
+    
+    try:
+        # This package is not part of anaconda and may need to be installed.
+        from datafed.CommandLib import API
+    except ImportError:
+       # _logger.info('datafed not found. Installing from pip.')
+        subprocess.call([sys.executable, "-m", "pip", "install", 'datafed'])
+        from datafed.CommandLib import API
+    df_api = API()
+        #print('Success! You have DataFed: ' + df_ver)
+    # Verify user authentication
+    if not df_api.getAuthUser():
+       print('You have not authenticated into DataFed Client')
 
 
+    # Check default Globus endpoint
+    if not df_api.endpointDefaultGet():
+        endpoint = 'cades#CADES-OR'
+        df_api.endpointDefaultSet(endpoint)
+
+
+
+    #print('Your default Globus Endpoint in DataFed is:\n' + df_api.endpointDefaultGet())
+    # Test the endpoint
+    path = str((Path.home()) / '.nufeb_tools' / 'datafed')
+    cp_dir = (Path.home()) / '.nufeb_tools' / 'datafed'
+    cp_dir.mkdir(exist_ok=True)
+    dget_resp = df_api.dataGet('d/35437908',
+                            path,
+                            wait=True)
+    #  _logger.debug(dget_resp)
+    if dget_resp[0].task[0].status == 3:
+        file = (Path.home()) / '.nufeb_tools' / 'datafed' /'35437908.md5sum'
+        file.unlink()
+    else:
+        if dget_resp[0].task[0].msg == "globus connect offline":
+            print('You need to activate your Globus Endpoint and/or ensure Globus Connect Personal is running.\n'
+                'Please visit https://globus.org to activate your Endpoint')
+            sys.exit(1)
+        elif dget_resp[0].task[0].msg == "permission denied":
+            print('Globus does not have write access to this directory. \n'
+                'If you are using Globus Connect Personal, ensure that this notebook runs within'
+                'one of the directories where Globus has write access. You may consider moving this'
+                'notebook to a valid directory or add this directory to the Globus Connect Personal settings')
+            sys.exit(1)
+        else:
+            NotImplementedError('Get in touch with us or consider looking online to find a solution to this problem:\n' + dget_resp[0].task[0].msg)
+            sys.exit(1)
