@@ -496,8 +496,9 @@ def main(args):
                                     'USER' : args.user,'Replicates'  : args.reps,
                                     'SucPct' : culture.SucPct,'n_cyanos' : culture.n_cyanos,
                                     'n_ecw' : culture.n_ecw,'id': global_coll_id})
-    f= open(f"./RunBatch.slurm","w+")
-    f.writelines(result)
+    # TODO update slurm script
+    #f= open(f"./RunBatch.slurm","w+")
+    #f.writelines(result)
     _logger.info("Script ends here")
 
 def run():

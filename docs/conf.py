@@ -103,7 +103,7 @@ master_doc = "index"
 
 # General information about the project.
 project = "nufeb_tools"
-copyright = "2021, Jsakkos"
+copyright = "2021, Jonathan Sakkos"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

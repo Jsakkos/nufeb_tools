@@ -17,4 +17,4 @@ Upload Data
 
 Get Data
 --------
-.. autofunction:: nufeb_tools.utils.get_datafed
+.. autofunction:: nufeb_tools.utils.get_data.get_datafed_data

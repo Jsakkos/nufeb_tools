@@ -13,6 +13,5 @@ matplotlib
 datafed
 opencv-python
 h5py
-dask
 seaborn
 tqdm

@@ -3,7 +3,6 @@ import h5py
 from pathlib import Path
 import pandas as pd
 import numpy as np
-from datafed.CommandLib import API
 import subprocess
 import sys
 import argparse
@@ -13,36 +12,56 @@ from urllib.parse import urlparse
 from urllib.request import urlretrieve
 import tarfile
 from nufeb_tools import __version__
-df_api = API()
-df_api.setContext('p/eng107')
+
 urls= ['https://github.com/Jsakkos/nufeb-tools/raw/main/data/runs.tar']
 
 class get_data:
-    """
+    """Collect results for analysis.
+
     NUFEB simulation data class to collect results for analysis
+
+    Attributes:
+        test (bool): Set `test = True` to get example data from the Github repository
+        directory (str): Path to the directory containing NUFEB simulation data. If `directory = None`, get_data will look for a DataFed collection
+        local (bool): Get data from a local directory. 
+        id (str):DataFed record ID, e.g., `"c/34558900"`
+        timestep (int): Length of simulation timestep in seconds
+        SucRatio (int): Relative cyanobacterial sucrose secretion level, 0-100
+        timepoints (List(str)): List of timepoints in the simulation
+        dims (List(str)): Size of the simulation boundaries in micrometers
+        numsteps (int): Number of timepoints
+        h5 (HDF5 File): HDF5 file containing NUFEB simulation data
+        biomass (pandas.DataFrame): Pandas Dataframe containing the biomass vs time data from biomass.csv
+        ntypes (pandas.DataFrame): Pandas Dataframe containing the cell number vs time data from ntypes.csv
+        avg_con (pandas.DataFrame): Pandas Dataframe containing the average nutrient concentrations vs time data from avg_concentration.csv
+        single_cell_biomass (pandas.DataFrame): Pandas Dataframe containing the single cell biomass over time of all cell ids present at the timepoint
+
     """
-    def __init__(self,directory,local=True,id=None,test=None,timestep=10):
+    def __init__(self,directory=None,id=None,test=None,timestep=10):
         if test:
             self.directory = str((Path.home()) / '.nufeb_tools' / 'data' / 'Run_26_90_83_1')
             if not os.path.isdir(self.directory):
                 download_test_data()
-            
-        else:
-            self.directory = directory
-        self.local = local
-        self.id = id
-        self.sucRatio = int(self.directory.split('_')[-2])
+        
+        
         self.timestep=timestep
-        if self.local:
+        if directory:
+            self.directory = directory
             self.get_local_data()
-        elif self.local is not True and self.id is not None:
-            self.datafed = self.get_datafed_data(self.id)
+            self.sucRatio = int(self.directory.split('_')[-2])
+        elif not directory and id is not None:
+            self.id = id
+            self.get_datafed_data()
+            self.sucRatio = int(self.directory.split('_')[3])
         else:
-            print('Something went wrong')
-        self.timepoints = [key for key in self.h5['concentration']['co2'].keys()]
-        self.timepoints.sort(key=int)
-        self.dims = self.h5['concentration']['co2']['0'].shape
-        self.numsteps = len(self.timepoints)
+            print('Missing local directory or DataFed Collection ID')
+        try:
+            self.timepoints = [key for key in self.h5['concentration']['co2'].keys()]
+            self.timepoints.sort(key=int)
+            self.dims = self.h5['concentration']['co2']['0'].shape
+            self.numsteps = len(self.timepoints)
+        except AttributeError:
+            print('Missing HDF5 file')
         
     def get_local_data(self):
         """
@@ -76,21 +95,43 @@ class get_data:
         self.biomass.index = self.biomass.step/60/60*self.timestep
         self.biomass.index.name='Hours'
         self.biomass.iloc[:,1:]=self.biomass.iloc[:,1:]*1e18
-    def get_datafed_data(record_id):
+    def get_datafed_data(self,dir=None,orig_fname=True,wait=True):
         """
         Collect NUFEB simulation data from a DataFed collection
 
         Args:
-            record_id (str):
-                The DataFed record identifier of the data
+            dir (str):
+                Directory to download the DataFed collection to. Defaults to user/.nufeb/data/collection
+            orig_fname (bool):
+                Use original filenames
+            wait (bool):
+                Wait for the download to complete before moving on
         """
-        dv_resp = df_api.dataView(record_id)
-        get_resp = df_api.dataGet(record_id,
-                          '.', # directory where data should be downloaded
-                          orig_fname=False, # do not name file by its original name
-                          wait=True, # Wait until Globus transfer completes
-                         )
-        return get_resp
+        from datafed.CommandLib import API
+        df_api = API()
+        df_api.setContext('p/eng107')
+        if not dir:
+            dv_resp = df_api.collectionView(self.id)
+            self.directory = str((Path.home()) / '.nufeb_tools' / 'data' / dv_resp[0].coll[0].title)
+        get_resp = df_api.dataGet(self.id,
+                            path=self.directory,
+                            orig_fname=orig_fname,
+                            wait=wait,
+                            )
+        self.h5 = h5py.File(os.path.join(self.directory,'trajectory.h5'))
+        self.biomass = pd.read_csv(os.path.join(
+            self.directory,'biomass.csv'),
+                                   usecols=[0,1,2],delimiter='\t')
+        self.ntypes = pd.read_csv(os.path.join(
+            self.directory,'ntypes.csv'))
+        self.avg_con = pd.read_csv(os.path.join(
+            self.directory,'avg_concentration.csv'),
+            usecols=[0,2,3,4],
+            delimiter='\t',
+            names=['Time','O2','Sucrose','CO2'],
+            skiprows=1)
+        self.convert_units_avg_con()
+        self.convert_units_biomass()
     #print(dv_resp)
     def radius_key(self,timestep):
         """
@@ -166,12 +207,7 @@ def download_test_data(urls=urls):
             tar.close()
             Path(local_filename).unlink()
 
-def get_datafed(record_id,dir='.',orig_fname=False,wait=True):
-    get_resp = df_api.dataGet(record_id,
-                          path=dir,
-                          orig_fname=orig_fname,
-                          wait=wait,
-                         )
+
 
 def upload_datafed(file, title, collection_id,metadata_file):
     """
@@ -224,6 +260,7 @@ def create_datafed_collection(n_cyanos, n_ecw, SucPct,dims):
             x, y, z simulation boundaries
     """
     try:
+        from datafed.CommandLib import API
         df_api = API()
         df_api.setContext('p/eng107')
         collectionName = f'NUFEB_{n_cyanos}_{n_ecw}_{SucPct}_{dims[0]}_{dims[1]}_{dims[2]}'
@@ -243,7 +280,6 @@ def verify_datafed_connection():
     """
     
     try:
-        # This package is not part of anaconda and may need to be installed.
         from datafed.CommandLib import API
     except ImportError:
        # _logger.info('datafed not found. Installing from pip.')
