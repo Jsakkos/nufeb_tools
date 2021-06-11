@@ -11,3 +11,4 @@ def test_local_import():
 def test_datafed_import():
     from nufeb_tools import utils
     utils.verify_datafed_connection()
+    utils.get_datafed('d/47160278')
