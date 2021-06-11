@@ -8,7 +8,7 @@ def overall_growth(df,ax=None, **kwargs):
     This is a function to generate growth curve plots
     
     Args:
-        df (pd.DataFrame):
+        df (pandas.DataFrame):
             Pandas Dataframe containing biomass data over time
 
         ax (plt.ax):
@@ -32,7 +32,7 @@ def average_nutrients(df,nutrient,ax=None,legend = None,**kwargs):
     This is a function to plot the nutrient concentration over time
     
     Args:
-        df (pd.DataFrame):
+        df (pandas.DataFrame):
             Pandas Dataframe containing nutrient data
 
         nutrient (str):
@@ -72,7 +72,7 @@ def biomass_time(df,id=None,ax=None,legend = None,**kwargs):
     This is a function to plot the cell biomass over time
     
     Args:
-        df (pd.DataFrame):
+        df (pandas.DataFrame):
             Pandas Dataframe containing biomass data
 
         ax:
@@ -105,7 +105,7 @@ def growth_curve_panel(df,**kwargs):
     Make growth curves panel with all cells
 
     Args:
-        df (pd.DataFrame):
+        df (pandas.DataFrame):
             Pandas Dataframe containing biomass data
 
         **kwargs:
@@ -138,7 +138,7 @@ def growth_rate_div(df, **kwargs):
     Plot a heatmap of the single cell growth rates relative to each division
 
     Args:
-        df (pd.DataFrame):
+        df (pandas.DataFrame):
             Pandas Dataframe containing biomass data
 
         **kwargs:
@@ -178,7 +178,7 @@ def growth_rate_time(df, period =3):
     Plot a heatmap of the single cell growth rates over time
 
     Args:
-        df (pd.DataFrame):
+        df (pandas.DataFrame):
             Pandas Dataframe containing biomass data
 
         period (int):

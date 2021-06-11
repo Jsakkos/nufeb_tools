@@ -23,7 +23,6 @@ class get_data:
     Attributes:
         test (bool): Set `test = True` to get example data from the Github repository
         directory (str): Path to the directory containing NUFEB simulation data. If `directory = None`, get_data will look for a DataFed collection
-        local (bool): Get data from a local directory. 
         id (str):DataFed record ID, e.g., `"c/34558900"`
         timestep (int): Length of simulation timestep in seconds
         SucRatio (int): Relative cyanobacterial sucrose secretion level, 0-100
