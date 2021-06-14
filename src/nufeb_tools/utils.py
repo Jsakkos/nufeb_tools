@@ -37,21 +37,22 @@ class get_data:
 
     """
     def __init__(self,directory=None,id=None,test=None,timestep=10):
+        self.timestep=timestep
         if test:
             self.directory = str((Path.home()) / '.nufeb_tools' / 'data' / 'Run_26_90_83_1')
             if not os.path.isdir(self.directory):
-                download_test_data()
-        
-        
-        self.timestep=timestep
-        if directory:
+                download_test_data()     
+            self.get_local_data()
+        elif directory:
             self.directory = directory
             self.get_local_data()
             self.sucRatio = int(self.directory.split('_')[-2])
-        elif not directory and id is not None:
+        elif id:
             self.id = id
             self.get_datafed_data()
             self.sucRatio = int(self.directory.split('_')[3])
+        elif directory and id:
+            print('Define either a local directory or DataFed Collection ID, not both')
         else:
             print('Missing local directory or DataFed Collection ID')
         try:
@@ -182,6 +183,22 @@ class get_data:
                 # append data to a dataframe
                 df = df.append(pd.DataFrame([[c,celltype,h,mass]],columns=['id','type','time','biomass']),ignore_index=True)
         self.single_cell_biomass = df
+        def get_positions(self,timepoint=0):
+            """
+            Extract the x, y, z position of each cell at a given timepoint
+
+            Args:
+                timepoint (int)
+                    The simulation timestep to get the position data from.
+            
+            Returns:
+                df (pandas.DataFrame)
+                    Dataframe containing ID, x, y, z columns
+            """
+             return pd.concat([pd.Series(self.h5['id'][time],name='ID'),
+             pd.Series(self.h5['x'][time],name='x'),
+             pd.Series(self.h5['y'][time],name='y'),
+             pd.Series(self.h5['z'][time],name='z')],axis=1)
 def download_test_data(urls=urls):
     """
     Get an example dataset from the Github repo. Downloads to "home/.nufeb_tools/data"
