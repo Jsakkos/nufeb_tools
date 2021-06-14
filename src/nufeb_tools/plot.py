@@ -87,19 +87,22 @@ def biomass_time(df,id=None,ax=None,legend = None,**kwargs):
     ax = ax or plt.gca()
     #plot cell size vs time
     palette = sns.color_palette("mako_r", 6)
-    data = df[df.id==1].reset_index()
-    ax.plot(data.time,data.biomass,color='#2ca25f')
+    if not id:
+        print('No cell ID specified')
+    else:
+        data = df[df.id==id].reset_index()
+        ax.plot(data.time,data.biomass,color='#2ca25f')
 
-    for line in find_peaks(data.biomass):
-        ax.vlines(data.time[line],data.biomass.min(),data.biomass.max()*1.1,color='#bdbdbd',ls=':')
-    ax.set_xlabel('Time (hours)')
-    ax.set_ylabel('Biomass (fg)')
-    ax.spines['right'].set_visible(False)
-    ax.spines['top'].set_visible(False)
-    sns.despine()
-    if legend:
-        ax.legend(frameon=False)
-    return ax
+        for line in find_peaks(data.biomass):
+            ax.vlines(data.time[line],data.biomass.min(),data.biomass.max()*1.1,color='#bdbdbd',ls=':')
+        ax.set_xlabel('Time (hours)')
+        ax.set_ylabel('Biomass (fg)')
+        ax.spines['right'].set_visible(False)
+        ax.spines['top'].set_visible(False)
+        sns.despine()
+        if legend:
+            ax.legend(frameon=False)
+        return ax
 def growth_curve_panel(df,**kwargs):
     """
     Make growth curves panel with all cells
