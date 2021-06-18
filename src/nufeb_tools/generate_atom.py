@@ -237,10 +237,11 @@ def main(args):
             f= open(f"./runs/atom_{n_cyanos}_{n_ecw}_{SucPct}_{r}.in","w+")
             f.writelines(L)
 
-
-        #write initial conditions pickle file
-        dumpfile = open(f"./runs/run_{n_cyanos}_{n_ecw}_{SucPct}.pkl",'wb')
-        pickle.dump(InitialConditions,dumpfile)
+        if not os.path.isdir('runs/Run_{n_cyanos}_{n_ecw}_{SucPct}_{args.reps}'):
+            os.mkdir('runs/Run_{n_cyanos}_{n_ecw}_{SucPct}_{args.reps}')
+        #write initial conditions json file
+        dumpfile = open(f"./runs/Run_{n_cyanos}_{n_ecw}_{SucPct}/metadata.json",'w')
+        json.dump(InitialConditions, dumpfile, indent = 6)
         dumpfile.close()
         #write Inputscript
         #open the file
@@ -267,6 +268,7 @@ def main(args):
         z = int(InitialConditions['Dimensions'][2]*1e6)
         if args.datafed is True or args.datafed == 'True':
         #create DataFed collection to hold the results
+        # TODO actually make this work
             df_api = API()
             df_api.setContext('p/eng107')
             collectionName = f'NUFEB_{culture.n_cyanos}_{culture.n_ecw}_{culture.SucPct}_{x}_{y}_{z}'

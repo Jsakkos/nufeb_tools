@@ -1,0 +1,50 @@
+{
+      "cyano": {
+            "GrowthRate": 1.67e-05,
+            "min_length": 1e-06,
+            "max_length": 5e-06,
+            "Diameter": 1e-06,
+            "Density": 370,
+            "Inertia": {
+                  "ixx": 0,
+                  "iyy": 0,
+                  "izz": 9.2e-23,
+                  "ixy": 0,
+                  "ixz": 0,
+                  "iyz": 0
+            },
+            "K_s": {
+                  "light": 0.00035,
+                  "o2": 0.0002,
+                  "suc": 0.01,
+                  "co2": 0.000138
+            },
+            "Yield": 0.55,
+            "Maintenance": 0,
+            "Decay": 0
+      },
+      "ecw": {
+            "GrowthRate": 0.00027,
+            "min_length": 1.94e-06,
+            "max_length": 2.72e-06,
+            "Diameter": 7.3e-07,
+            "Density": 236,
+            "Inertia": {
+                  "ixx": 0,
+                  "iyy": 0,
+                  "izz": 9.2e-23,
+                  "ixy": 0,
+                  "ixz": 0,
+                  "iyz": 0
+            },
+            "K_s": {
+                  "light": 0,
+                  "o2": 0.001,
+                  "suc": 3.6,
+                  "co2": 0.05
+            },
+            "Yield": 0.43,
+            "Maintenance": 9.5e-07,
+            "Decay": 2e-05
+      }
+}

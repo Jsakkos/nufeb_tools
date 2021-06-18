@@ -1,0 +1,83 @@
+{
+      "cyano": {
+            "StartingCells": 26,
+            "GrowthRate": 1.67e-05,
+            "min_size": 1.37e-06,
+            "max_size": 1.94e-06,
+            "Density": 370,
+            "K_s": {
+                  "sub": 0.00035,
+                  "o2": 0.0002,
+                  "suc": 0.01,
+                  "co2": 0.000138
+            },
+            "GrowthParams": {
+                  "Yield": 0.55,
+                  "Maintenance": 0,
+                  "Decay": 0
+            }
+      },
+      "ecw": {
+            "StartingCells": 90,
+            "GrowthRate": 0.00027,
+            "min_size": 8.8e-07,
+            "max_size": 1.04e-06,
+            "Density": 236,
+            "K_s": {
+                  "sub": 0,
+                  "o2": 0.001,
+                  "suc": 3.6,
+                  "co2": 0.05
+            },
+            "GrowthParams": {
+                  "Yield": 0.43,
+                  "Maintenance": 9.5e-07,
+                  "Decay": 2e-05
+            }
+      },
+      "Nutrients": {
+            "Concentration": {
+                  "sub": 0.1,
+                  "o2": 0.009,
+                  "suc": 3.4229999999999995e-20,
+                  "co2": 44.01
+            },
+            "State": {
+                  "sub": "g",
+                  "o2": "l",
+                  "suc": "l",
+                  "co2": "l"
+            },
+            "xbc": {
+                  "sub": "nn",
+                  "o2": "nn",
+                  "suc": "nn",
+                  "co2": "nn"
+            },
+            "ybc": {
+                  "sub": "nn",
+                  "o2": "nn",
+                  "suc": "nn",
+                  "co2": "nn"
+            },
+            "zbc": {
+                  "sub": "nn",
+                  "o2": "nn",
+                  "suc": "nn",
+                  "co2": "nn"
+            }
+      },
+      "Diff_c": {
+            "sub": 0,
+            "o2": 2.3e-09,
+            "suc": 5.2e-10,
+            "co2": 1.9e-09
+      },
+      "Dimensions": [
+            0.0001,
+            0.0001,
+            1e-05
+      ],
+      "SucRatio": 0.832,
+      "Replicates": 1
+}

@@ -2,6 +2,8 @@ import seaborn as sns
 import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.signal import find_peaks
+from scipy.optimize import curve_fit
+import numpy as np
 
 def overall_growth(df,ax=None, **kwargs):
     """
@@ -216,5 +218,87 @@ def growth_rate_time(df, period =3):
     axes[0].set_title('S. elongatus')
     axes[1].set_title('E. coli')
 
+    fig.tight_layout()
+    return fig
+
+def get_growth_intervals(dataframe,cellID):
+    df = dataframe[dataframe.id==cellID].reset_index(drop=True)
+    biomass = df.biomass
+    time = df.time
+    pks = find_peaks(biomass)[0]
+    intervals = list()
+    for i in range(len(pks)+1):
+        if i == 0:
+            intervals.append([df.index[0],pks[0]+1])
+        elif i < len(pks):
+            intervals.append([pks[i-1]+1,pks[i]+1])
+        else:
+            intervals.append([pks[i-1]+1,df.index[-1]])
+    def func(t,y0,mu):
+        return y0*np.exp(t*mu)
+    cell_type = df.type.unique()[0]
+    mu = list()
+    for interval in intervals:
+        y0 = df.iloc[interval[0],3]
+        t = np.linspace(df.iloc[interval[0],2],df.iloc[interval[1],2],1000)
+        t_measured = df.iloc[interval[0]:interval[1],2]
+        biomass_measured = df.iloc[interval[0]:interval[1],3]
+        popt, pcov = curve_fit(func, t_measured, biomass_measured)
+        plt.plot(df.iloc[interval[0]:interval[1],2],df.iloc[interval[0]:interval[1],3])
+        plt.plot(t_measured,func(t_measured, *popt),ls='--')
+        mu.append(round(popt[1],4))
+    return mu
+
+def growth_rate_mu(df, **kwargs):
+    """
+    Plot a heatmap of the single cell growth rates relative to each division
+
+    Args:
+        df (pandas.DataFrame):
+            Pandas Dataframe containing biomass data
+
+        **kwargs:
+            Additional arguments to pass to plt.plot
+    """
+    def func(t,y0,mu):
+        return y0*np.exp(t*mu)
+    celltypes = df.type.unique()
+    celltypes.sort()
+    fig, axes = plt.subplots(ncols=2,figsize=(14,7))
+    for ct in celltypes:
+        divs = pd.DataFrame(columns=['id','division','rate'])
+        cells = df[df.type==ct].id.unique()
+        cells.sort()
+        for cell in cells:
+            data = df[(df.id==cell) & (df.type==ct)].reset_index(drop=True)
+            pks,_ = find_peaks(data.biomass)
+            intervals = list()
+            for i in range(len(pks)+1):
+                if i == 0:
+                    intervals.append([data.index[0],pks[0]+1])
+                elif i < len(pks):
+                    intervals.append([pks[i-1]+1,pks[i]+1])
+                else:
+                    intervals.append([pks[i-1]+1,data.index[-1]])
+
+
+            for i,interval in enumerate(intervals):
+                y0 = data.iloc[interval[0],3]
+                t = np.linspace(data.iloc[interval[0],2],data.iloc[interval[1],2],1000)
+                t_measured = data.iloc[interval[0]:interval[1],2]
+                biomass_measured = data.iloc[interval[0]:interval[1],3]
+                if len(biomass_measured) > 4:
+                    popt, pcov = curve_fit(func, t_measured, biomass_measured)
+                    #print(round(popt[1],4))
+                    divs = divs.append(pd.DataFrame([[cell,i+1,round(popt[1],4)]],columns=['id','division','mu']),ignore_index=True)
+                    #plot cell id vs division rate over time
+
+        #plot cell id vs division rate over time
+        piv = divs.pivot_table(index='id', columns='division', values='mu')
+        g = sns.heatmap(piv, cmap='coolwarm',ax=axes[ct-1])
+        cbar = g.collections[0].colorbar
+        cbar.ax.set_ylabel(r'Growth rate ($\frac{1}{hr}$)')
+    axes[0].set_title('S. elongatus')
+    axes[1].set_title('E. coli')
     fig.tight_layout()
     return fig

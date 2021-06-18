@@ -413,9 +413,11 @@ def main(args):
             f= open(f"./runs/atom_{culture.n_cyanos}_{culture.n_ecw}_{culture.SucPct}_{r}.in","w+")
             f.writelines(atoms)
 
-        #write initial conditions pickle file
-        dumpfile = open(f"./runs/run_{culture.n_cyanos}_{culture.n_ecw}_{culture.SucPct}.pkl",'wb')
-        pickle.dump(CellInfo,dumpfile)
+        if not os.path.isdir('runs/Run_{culture.n_cyanos}_{culture.n_ecw}_{culture.SucPct}_{args.reps}'):
+            os.mkdir('runs/Run_{culture.n_cyanos}_{culture.n_ecw}_{culture.SucPct}_{args.reps}')
+        #write initial conditions json file
+        dumpfile = open(f"./runs/Run_{culture.n_cyanos}_{culture.n_ecw}_{culture.SucPct}/metadata.json",'w')
+        json.dump(CellInfo, dumpfile, indent = 6)
         dumpfile.close()
         ###
 

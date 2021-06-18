@@ -3,6 +3,7 @@ import h5py
 from pathlib import Path
 import pandas as pd
 import numpy as np
+import json
 import subprocess
 import sys
 import argparse
@@ -58,7 +59,8 @@ class get_data:
         try:
             self.timepoints = [key for key in self.h5['concentration']['co2'].keys()]
             self.timepoints.sort(key=int)
-            self.dims = self.h5['concentration']['co2']['0'].shape
+            self.dims = list(self.h5['concentration']['co2']['0'].shape)
+            self.dims += [self.dims.pop(0)] # move Z dimension to last: z,x,y to x,y,z
             self.numsteps = len(self.timepoints)
         except AttributeError:
             print('Missing HDF5 file')
@@ -79,6 +81,9 @@ class get_data:
             delimiter='\t',
             names=['Time','O2','Sucrose','CO2'],
             skiprows=1)
+        f = open(os.path.join(self.directory,'metadata.json'),)
+        self.metadata  = json.load(f)
+        f.close()
         self.convert_units_avg_con()
         self.convert_units_biomass()
     def convert_units_avg_con(self):
@@ -119,6 +124,7 @@ class get_data:
                             wait=wait,
                             )
         self.h5 = h5py.File(os.path.join(self.directory,'trajectory.h5'))
+        self.metadata = json.loads(dv_resp[0].data[0].metadata)
         self.biomass = pd.read_csv(os.path.join(
             self.directory,'biomass.csv'),
                                    usecols=[0,1,2],delimiter='\t')
@@ -195,10 +201,62 @@ class get_data:
                 df (pandas.DataFrame)
                     Dataframe containing ID, x, y, z columns
             """
-             return pd.concat([pd.Series(self.h5['id'][time],name='ID'),
-             pd.Series(self.h5['x'][time],name='x'),
-             pd.Series(self.h5['y'][time],name='y'),
-             pd.Series(self.h5['z'][time],name='z')],axis=1)
+            return pd.concat([pd.Series(self.h5['id'][timepoint],name='ID'),
+            pd.Series(self.h5['x'][timepoint],name='x'),
+            pd.Series(self.h5['y'][timepoint],name='y'),
+            pd.Series(self.h5['z'][timepoint],name='z')],axis=1)
+        def get_grid_idx(array,value):
+            """
+            Find the nutrient grid index value. Taken from https://stackoverflow.com/questions/2566412/find-nearest-value-in-numpy-array.
+
+            Args:
+                array (numpy.array):
+                    1D Array containing the grid positions
+                value (float):
+                    Cell location to map to the grid
+            Returns:
+                index (int):
+                    Grid index
+            """
+            n = len(array)
+
+            jl = 0# Initialize lower
+            ju = n-1# and upper limits.
+            while (ju-jl > 1):# If we are not yet done,
+                jm=(ju+jl) >> 1# compute a midpoint with a bitshift
+                if (value >= array[jm]):
+                    jl=jm# and replace either the lower limit
+                else:
+                    ju=jm# or the upper limit, as appropriate.
+                # Repeat until the test condition is satisfied.
+            if (value == array[0]):# edge cases at bottom
+                return 0
+            elif (value == array[n-1]):# and top
+                return n-1
+            else:
+                return jl
+        def get_local_con(self,nutrient,timestep,cellID):
+            """
+            Get the local nutrient concentration of a cell
+
+            Args:
+                nutrient (str):
+                    The nutrient to check the concentration of
+                timestep (int):
+                    The timestep at which to check the concentration
+                cellID (int):
+                    The cell identification number
+            
+            Returns:
+                Nutrient Concentration (float):
+                    The concentration of the specified nutrient within the cell's grid
+            """
+            cell_locs = self.get_positions(timestep)
+            grid = [np.linspace(0,self.metadata['Dimensions'][x],self.dims[x]) for x in range(3)]
+            grid_loc = [get_grid_idx(grid[i],cell_locs[cell_locs.ID ==cellID][d].values[0]) for i,d in enumerate(['x','y','z'])]
+            return self.h5['concentration'][nutrient][str(timestep)][grid_loc[2],grid_loc[0],grid_loc[1]]
+
+             
 def download_test_data(urls=urls):
     """
     Get an example dataset from the Github repo. Downloads to "home/.nufeb_tools/data"
