@@ -159,7 +159,7 @@ class get_data:
 
         Args:
             timepoint (int):
-            The simulation timestep to calculate from. Default = 0.
+                The simulation timestep to calculate from. Default = 0.
         """
         self.hrs = [int(x)/360 for x in self.timepoints]
         df = pd.DataFrame(columns=['id','type','time','biomass'])
@@ -189,72 +189,90 @@ class get_data:
                 # append data to a dataframe
                 df = df.append(pd.DataFrame([[c,celltype,h,mass]],columns=['id','type','time','biomass']),ignore_index=True)
         self.single_cell_biomass = df
-        def get_positions(self,timepoint=0):
-            """
-            Extract the x, y, z position of each cell at a given timepoint
+    def get_positions(self,timepoint=0):
+        """
+        Extract the x, y, z position of each cell at a given timepoint
 
-            Args:
-                timepoint (int)
-                    The simulation timestep to get the position data from.
-            
-            Returns:
-                df (pandas.DataFrame)
-                    Dataframe containing ID, x, y, z columns
-            """
-            return pd.concat([pd.Series(self.h5['id'][timepoint],name='ID'),
-            pd.Series(self.h5['x'][timepoint],name='x'),
-            pd.Series(self.h5['y'][timepoint],name='y'),
-            pd.Series(self.h5['z'][timepoint],name='z')],axis=1)
-        def get_grid_idx(array,value):
-            """
-            Find the nutrient grid index value. Taken from https://stackoverflow.com/questions/2566412/find-nearest-value-in-numpy-array.
+        Args:
+            timepoint (int):
+                The simulation timestep to get the position data from.
+        
+        Returns:
+            df (pandas.DataFrame):
+                Dataframe containing ID, type,x, y, z columns
+        """
+        return pd.concat([pd.Series(self.h5['id'][str(timepoint)],name='ID'),
+        pd.Series(self.h5['type'][str(timepoint)],name='type'),
+        pd.Series(self.h5['x'][str(timepoint)],name='x'),
+        pd.Series(self.h5['y'][str(timepoint)],name='y'),
+        pd.Series(self.h5['z'][str(timepoint)],name='z')],axis=1)
+    def get_neighbor_distance(self,id,timepoint):
+        """
+        Get the nearest neighbor cell distances
 
-            Args:
-                array (numpy.array):
-                    1D Array containing the grid positions
-                value (float):
-                    Cell location to map to the grid
-            Returns:
-                index (int):
-                    Grid index
-            """
-            n = len(array)
+        Args:
+            id (int):
+                The ID of the reference cell
+            timepoint (int):
+                The timepoint to check the neighbor distances from
+        Returns:
+            df (pandas.DataFrame):
+                Dataframe containing ID, type, Distance
+        """
+        df = self.get_positions(timepoint)
+        temp = (df[df.ID ==id][['x','y','z']].squeeze() - df[df.ID !=id][['x','y','z']])**2
+        dist = pd.Series(np.sqrt(temp.x + temp.y + temp.z),name='Distance')
+        return pd.concat([df[df.ID !=id][['ID','type']],dist],axis=1).reset_index(drop=True)
+    def get_grid_idx(array,value):
+        """
+        Find the nutrient grid index value. Taken from https://stackoverflow.com/questions/2566412/find-nearest-value-in-numpy-array.
 
-            jl = 0# Initialize lower
-            ju = n-1# and upper limits.
-            while (ju-jl > 1):# If we are not yet done,
-                jm=(ju+jl) >> 1# compute a midpoint with a bitshift
-                if (value >= array[jm]):
-                    jl=jm# and replace either the lower limit
-                else:
-                    ju=jm# or the upper limit, as appropriate.
-                # Repeat until the test condition is satisfied.
-            if (value == array[0]):# edge cases at bottom
-                return 0
-            elif (value == array[n-1]):# and top
-                return n-1
+        Args:
+            array (numpy.array):
+                1D Array containing the grid positions
+            value (float):
+                Cell location to map to the grid
+        Returns:
+            index (int):
+                Grid index
+        """
+        n = len(array)
+
+        jl = 0# Initialize lower
+        ju = n-1# and upper limits.
+        while (ju-jl > 1):# If we are not yet done,
+            jm=(ju+jl) >> 1# compute a midpoint with a bitshift
+            if (value >= array[jm]):
+                jl=jm# and replace either the lower limit
             else:
-                return jl
-        def get_local_con(self,nutrient,timestep,cellID):
-            """
-            Get the local nutrient concentration of a cell
+                ju=jm# or the upper limit, as appropriate.
+            # Repeat until the test condition is satisfied.
+        if (value == array[0]):# edge cases at bottom
+            return 0
+        elif (value == array[n-1]):# and top
+            return n-1
+        else:
+            return jl
+    def get_local_con(self,nutrient,timestep,cellID):
+        """
+        Get the local nutrient concentration of a cell
 
-            Args:
-                nutrient (str):
-                    The nutrient to check the concentration of
-                timestep (int):
-                    The timestep at which to check the concentration
-                cellID (int):
-                    The cell identification number
-            
-            Returns:
-                Nutrient Concentration (float):
-                    The concentration of the specified nutrient within the cell's grid
-            """
-            cell_locs = self.get_positions(timestep)
-            grid = [np.linspace(0,self.metadata['Dimensions'][x],self.dims[x]) for x in range(3)]
-            grid_loc = [get_grid_idx(grid[i],cell_locs[cell_locs.ID ==cellID][d].values[0]) for i,d in enumerate(['x','y','z'])]
-            return self.h5['concentration'][nutrient][str(timestep)][grid_loc[2],grid_loc[0],grid_loc[1]]
+        Args:
+            nutrient (str):
+                The nutrient to check the concentration of
+            timestep (int):
+                The timestep at which to check the concentration
+            cellID (int):
+                The cell identification number
+        
+        Returns:
+            Nutrient Concentration (float):
+                The concentration of the specified nutrient within the cell's grid
+        """
+        cell_locs = self.get_positions(timestep)
+        grid = [np.linspace(0,self.metadata['Dimensions'][x],self.dims[x]) for x in range(3)]
+        grid_loc = [self.get_grid_idx(grid[i],cell_locs[cell_locs.ID ==cellID][d].values[0]) for i,d in enumerate(['x','y','z'])]
+        return self.h5['concentration'][nutrient][str(timestep)][grid_loc[2],grid_loc[0],grid_loc[1]]
 
              
 def download_test_data(urls=urls):
