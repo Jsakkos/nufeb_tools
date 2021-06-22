@@ -8,7 +8,7 @@ nufeb_tools
 .. image:: https://badge.fury.io/py/nufeb-tools.svg
     :target: https://badge.fury.io/py/nufeb-tools
 
-.. image:: https://github.com/Jsakkos/nufeb-tools/actions/workflows/Test.yml/badge.svg
+.. |tests| image:: https://github.com/Jsakkos/nufeb-tools/actions/workflows/Test.yml/badge.svg
         :alt: Tox testing status
 
 Python-based tools and utilities for NUFEB simulations 
