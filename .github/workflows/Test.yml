@@ -1,4 +1,4 @@
-name: nufeb-tools
+name: testing
 
 on:
   - push
