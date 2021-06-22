@@ -410,14 +410,15 @@ def main(args):
             atoms.append(' Bacilli \n\n')
             atoms = atoms + bacilli_list
             #write atom definition file
-            f= open(f"./runs/atom_{culture.n_cyanos}_{culture.n_ecw}_{culture.SucPct}_{r}.in","w+")
+            f= open(f"runs/atom_{culture.n_cyanos}_{culture.n_ecw}_{culture.SucPct}_{r}.in","w+")
             f.writelines(atoms)
         RUN_DIR = Path('runs') / f'Run_{culture.n_cyanos}_{culture.n_ecw}_{culture.SucPct}_{args.reps}'
-        if not os.path.isdir(f'runs/Run_{culture.n_cyanos}_{culture.n_ecw}_{culture.SucPct}_{args.reps}'):
+        if not os.path.isdir(RUN_DIR):
             os.mkdir(RUN_DIR)
             #os.mkdir(f'runs/Run_{culture.n_cyanos}_{culture.n_ecw}_{culture.SucPct}_{args.reps}')
         #write initial conditions json file
-        dumpfile = open(f"/runs/Run_{culture.n_cyanos}_{culture.n_ecw}_{culture.SucPct}_{args.reps}/metadata.json",'w')
+        dumpfile = open(RUN_DIR / 'metadata.json','w')
+        #dumpfile = open(f"/runs/Run_{culture.n_cyanos}_{culture.n_ecw}_{culture.SucPct}_{args.reps}/metadata.json",'w')
         json.dump(CellInfo, dumpfile, indent = 6)
         dumpfile.close()
         ###

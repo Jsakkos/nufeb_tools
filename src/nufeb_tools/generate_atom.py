@@ -234,13 +234,13 @@ def main(args):
             L.append('\n\n')
 
             #write atom definition file
-            f= open(f"./runs/atom_{n_cyanos}_{n_ecw}_{SucPct}_{r}.in","w+")
+            f= open(f"runs/atom_{n_cyanos}_{n_ecw}_{SucPct}_{r}.in","w+")
             f.writelines(L)
-
-        if not os.path.isdir(f'runs/Run_{n_cyanos}_{n_ecw}_{SucPct}_{args.reps}'):
-            os.mkdir(f'runs/Run_{n_cyanos}_{n_ecw}_{SucPct}_{args.reps}')
+        RUN_DIR = Path(f'runs/Run_{n_cyanos}_{n_ecw}_{SucPct}_{args.reps}')
+        if not os.path.isdir(RUN_DIR):
+            os.mkdir(RUN_DIR)
         #write initial conditions json file
-        dumpfile = open(f"./runs/Run_{n_cyanos}_{n_ecw}_{SucPct}/metadata.json",'w')
+        dumpfile = open(RUN_DIR / 'metadata.json','w')
         json.dump(InitialConditions, dumpfile, indent = 6)
         dumpfile.close()
         #write Inputscript
