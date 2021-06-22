@@ -237,8 +237,8 @@ def main(args):
             f= open(f"./runs/atom_{n_cyanos}_{n_ecw}_{SucPct}_{r}.in","w+")
             f.writelines(L)
 
-        if not os.path.isdir('runs/Run_{n_cyanos}_{n_ecw}_{SucPct}_{args.reps}'):
-            os.mkdir('runs/Run_{n_cyanos}_{n_ecw}_{SucPct}_{args.reps}')
+        if not os.path.isdir(f'runs/Run_{n_cyanos}_{n_ecw}_{SucPct}_{args.reps}'):
+            os.mkdir(f'runs/Run_{n_cyanos}_{n_ecw}_{SucPct}_{args.reps}')
         #write initial conditions json file
         dumpfile = open(f"./runs/Run_{n_cyanos}_{n_ecw}_{SucPct}/metadata.json",'w')
         json.dump(InitialConditions, dumpfile, indent = 6)
