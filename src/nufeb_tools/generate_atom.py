@@ -1,15 +1,12 @@
 import random
 import argparse
 import numpy as np
-import pickle
 from string import Template
-import json # For dealing with metadata
-import os # For file level operations
+import json
+import os
 import sys
-import time # For timing demonstrations
-import datetime # To demonstrate conversion between date and time formats
+from datetime import date
 from datafed.CommandLib import API
-import importlib.resources
 import logging
 from nufeb_tools import __version__
 from pathlib import Path
@@ -122,7 +119,7 @@ def main(args):
     # check for runs folder
     if not os.path.isdir('runs'):
         os.mkdir('runs')
-
+    today = str(date.today())
     for n in range(1,int(args.num)+1):
         SucRatio = round(random.random(),3)
         SucPct = int(SucRatio*100)
@@ -153,6 +150,9 @@ def main(args):
             ecwGroup = 'group ECW type 1'
             cyDiv = ''
             ecwDiv = f'fix d2 ECW divide 100 v_EPSdens v_divDia2 {random.randint(1,1e6)}'
+        RUN_DIR = Path(f'runs/Run_{n_cyanos}_{n_ecw}_{SucPct}_{args.reps}_{today}')
+        if not os.path.isdir(RUN_DIR):
+            os.mkdir(RUN_DIR)
         # TODO embed cell type into metadata file and generate cell type programmatically
         InitialConditions = {'cyano': {'StartingCells' : n_cyanos,'GrowthRate' : mu_cyanos,
             'min_size' : 1.37e-6, 'max_size' : 1.94e-6, 'Density' : 370,
@@ -234,11 +234,9 @@ def main(args):
             L.append('\n\n')
 
             #write atom definition file
-            f= open(f"runs/atom_{n_cyanos}_{n_ecw}_{SucPct}_{r}.in","w+")
+            f= open(RUN_DIR / f"atom_{n_cyanos}_{n_ecw}_{SucPct}_{r}_{today}.in","w+")
             f.writelines(L)
-        RUN_DIR = Path(f'runs/Run_{n_cyanos}_{n_ecw}_{SucPct}_{args.reps}')
-        if not os.path.isdir(RUN_DIR):
-            os.mkdir(RUN_DIR)
+
         #write initial conditions json file
         dumpfile = open(RUN_DIR / 'metadata.json','w')
         json.dump(InitialConditions, dumpfile, indent = 6)
@@ -253,12 +251,13 @@ def main(args):
         result = src.safe_substitute({'n' : n, 'SucRatio' : SucRatio, 'SucPct' : SucPct,
                                     'n_cyanos' : n_cyanos, 'n_ecw' : n_ecw,
                                     'Replicates' : args.reps,'Timesteps' : args.timesteps,
+                                    'date' : today,
                                     'CYANOGroup' : cyGroup,
                                     'ECWGroup' : ecwGroup,
                                     'Zheight' : InitialConditions["Dimensions"][2],
                                     'CYANODiv'  : cyDiv, 'ECWDiv' : ecwDiv,
                                     'GridMesh' : f'{int(InitialConditions["Dimensions"][0]*1e6/int(args.grid))} {int(InitialConditions["Dimensions"][1]*1e6/int(args.grid))} {int(InitialConditions["Dimensions"][2]*1e6/int(args.grid))}'})
-        f= open(f"./runs/Inputscript_{n_cyanos}_{n_ecw}_{SucPct}.lammps","w+")
+        f= open(RUN_DIR / f"Inputscript_{n_cyanos}_{n_ecw}_{SucPct}_{today}.lammps","w+")
         f.writelines(result)
 
 
@@ -290,7 +289,7 @@ def main(args):
                                         'USER' : args.user,'Replicates'  : args.reps,
                                         'SucPct' : SucPct,'n_cyanos' : n_cyanos,
                                         'n_ecw' : n_ecw,'id': global_coll_id})
-        f= open(f"./runs/Inputscript_{n_cyanos}_{n_ecw}_{SucPct}.slurm","w+")
+        f= open(RUN_DIR / f"Inputscript_{n_cyanos}_{n_ecw}_{SucPct}_{today}.slurm","w+")
         f.writelines(result)
         #write local run script
         #open the file
@@ -302,7 +301,7 @@ def main(args):
         result = src.safe_substitute({'n' : n, 'SucRatio' : SucRatio, 'SucPct' : SucPct,
                                     'n_cyanos' : n_cyanos, 'n_ecw' : n_ecw,
                                     'Reps' : args.reps,'id': global_coll_id})
-        f= open(f"./runs/local_{n_cyanos}_{n_ecw}_{SucPct}.sh","w+")
+        f= open(RUN_DIR / f"local_{n_cyanos}_{n_ecw}_{SucPct}.sh","w+")
         f.writelines(result)
 
         _logger.info("Script ends here")
