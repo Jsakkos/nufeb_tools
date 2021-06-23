@@ -8,7 +8,7 @@ processors  * * *
 
 comm_modify	vel yes
 #variable reps loop ${Replicates}
-read_data_bio atom_${n_cyanos}_${n_ecw}_${SucPct}_${date}.in
+read_data_bio atom_${n_cyanos}_${n_ecw}_${SucPct}_${Replicates}_${date}.in
 #shell mkdir Run_${n_cyanos}_${n_ecw}_${SucPct}_${Replicates}
 #shell cd Run_${n_cyanos}_${n_ecw}_${SucPct}_${Replicates}
 ##############Define initial particle distribution##############
