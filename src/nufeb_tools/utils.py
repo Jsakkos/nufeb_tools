@@ -324,7 +324,7 @@ def download_test_data(urls=urls):
     cp_dir.mkdir(exist_ok=True)
     data_dir = cp_dir.joinpath('data')
     data_dir.mkdir(exist_ok=True)
-
+    # TODO Add progress bar
     for url in urls:
         parts = urlparse(url)
         filename = os.path.basename(parts.path)
