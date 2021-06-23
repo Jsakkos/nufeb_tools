@@ -1,10 +1,28 @@
+===========
 nufeb_tools
 ===========
 
 |docs|  |pypi|  |tests|
 
+Description
+===========
 
 Python-based tools and utilities for NUFEB simulations 
+
+Getting Started
+===============
+
+Install via pip::
+
+        pip install nufeb-tools
+
+Generate NUFEB simulations from the CLI::
+
+        nufeb-seed
+
+Remove old runs::
+
+        nufeb-clean
 
 
 
