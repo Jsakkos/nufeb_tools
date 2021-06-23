@@ -249,6 +249,38 @@ class get_data:
             nutes = list(self.h5['concentration'].__iter__())
             print('Nutrient ' + nutrient + ' not found. Try:')
             print(*nutes)
+    def get_fitness(self,timestep,cellID):
+        """
+        Get the fitness of an individual cell based on the relative Monod growth rate at a given timestep
+
+        Args:
+            timestep (int):
+                The timestep at which to check the concentration
+            cellID (int):
+                The cell identification number
+        Returns:
+            fitness (float):
+                The Monod growth rate (1/s)
+        """
+        if self.h5['type'].__contains__(str(timestep)): 
+            cell_type = self.h5['type'][str(timestep)][np.where(self.h5['id'][str(timestep)].__array__() == cellID)[0][0]]
+        else:
+            print('Timestep or cell ID not found')
+            return
+        if cell_type == 1:
+            metadata = self.metadata['cyano']
+            light = self.get_local_con('sub',timestep,cellID)
+            co2 = self.get_local_con('co2',timestep,cellID)
+            fitness = metadata['GrowthRate'] * (light / (metadata['K_s']['sub'] + light)) * (co2 / (metadata['K_s']['co2'] + co2))
+            return fitness
+        elif cell_type == 2:
+            metadata = self.metadata['ecw']
+            suc = self.get_local_con('suc',timestep,cellID)
+            o2 = self.get_local_con('o2',timestep,cellID)
+            maintenance = metadata['GrowthParams']['Maintenance'] * (o2 / (metadata['K_s']['o2'] + o2))
+            decay = metadata['GrowthParams']['Decay']
+            fitness = metadata['GrowthRate'] * (suc / (metadata['K_s']['suc'] + suc)) * (o2 / (metadata['K_s']['o2'] + o2))
+            return fitness - maintenance - decay
 
 def get_grid_idx(array,value):
     """

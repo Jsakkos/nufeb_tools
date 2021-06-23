@@ -153,7 +153,7 @@ def main(args):
             ecwGroup = 'group ECW type 1'
             cyDiv = ''
             ecwDiv = f'fix d2 ECW divide 100 v_EPSdens v_divDia2 {random.randint(1,1e6)}'
-
+        # TODO embed cell type into metadata file and generate cell type programmatically
         InitialConditions = {'cyano': {'StartingCells' : n_cyanos,'GrowthRate' : mu_cyanos,
             'min_size' : 1.37e-6, 'max_size' : 1.94e-6, 'Density' : 370,
                 'K_s' : {'sub' : 3.5e-4,'o2' : 2e-4, 'suc' : 1e-2,'co2' : 1.38e-4},
