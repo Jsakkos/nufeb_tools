@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<VTKFile type="ImageData" version="0.1" byte_order="LittleEndian" header_type="UInt32" compressor="vtkZLibDataCompressor">
+  <ImageData WholeExtent="0 25 0 12 0 5" Origin="0 0 0" Spacing="2e-06 2e-06 2e-06">
+    <Piece Extent="0 25 0 12 0 5"                                                     >
+      <PointData>
+      </PointData>
+      <CellData>
+        <DataArray type="Float64" Name="sub concentration" format="appended" RangeMin="0.1"                  RangeMax="0.1"                  offset="0"                   />
+        <DataArray type="Float64" Name="o2 concentration" format="appended" RangeMin="0.009"                RangeMax="0.009"                offset="88"                  />
+        <DataArray type="Float64" Name="suc concentration" format="appended" RangeMin="3.42e-20"             RangeMax="3.42e-20"             offset="184"                 />
+        <DataArray type="Float64" Name="co2 concentration" format="appended" RangeMin="0.07"                 RangeMax="0.07"                 offset="280"                 />
+      </CellData>
+    </Piece>
+  </ImageData>
+  <AppendedData encoding="base64">
+   _AQAAAACAAADgLgAAMAAAAA==eJztxTERAAAIBKBo5vSb2M4zhQsspM9UbNu2bdu2bdu2bdu2bdu2bdt+fAHAqrdrAQAAAACAAADgLgAANgAAAA==eJztxSEBADAIALBgiEegCSHw18SjymPcbGaxeaf6hG3btm3btm3btm3btm3btm3bH3+gWeLMAQAAAACAAADgLgAANgAAAA==eJztxSEBADAIALA6yHvi4J7pXShDkMfAbGb1+saZLNu2bdu2bdu2bdu2bdu2bdu2F//EEDjgAQAAAACAAADgLgAANgAAAA==eJztxTEBACAIALAmVDEDoQjkZycIYQye7dnki+p7xrZt27Zt27Zt27Zt27Zt27btxT9QbBNb
+  </AppendedData>
+</VTKFile>

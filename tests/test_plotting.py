@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 x = utils.get_data(directory = None,test=True)
 def avg_nute_plot():
     f, ax = plt.subplots()
-    plot.average_nutrients(x.avg_con,'Sucrose',ax=ax,color='Green',legend=True)
+    plot.average_nutrients(x.avg_con,'suc',ax=ax,color='Green',legend=True)
 def single_cell_plot():
     f, ax = plt.subplots()
     x.single_cell_growth()
