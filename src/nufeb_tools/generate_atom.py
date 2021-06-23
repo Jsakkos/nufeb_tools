@@ -40,7 +40,7 @@ def parse_args(args):
     parser.add_argument('--c',dest='culture_type',action='store',default='co',
                         help='Set culture conditions with --c (co-culture), --ax-c (cyano), --ax-e (e.coli)')
     parser.add_argument('--co2', dest='co2', action='store',
-                    default=1e3,
+                    default=6.9e-1,
                     help='Set initial CO2 concentration (mM)')
     parser.add_argument('--d', dest='dims', action='store', type=str,
                     default='1e-4,1e-4,1e-5',
@@ -166,7 +166,7 @@ def main(args):
                 'State' : {'sub' : 'g','o2' : 'l', 'suc' : 'l', 'co2' : 'l'},
                 'xbc' : {'sub' : 'nn','o2' : 'nn', 'suc' : 'nn', 'co2' : 'nn'},
                 'ybc' : {'sub' : 'nn','o2' : 'nn', 'suc' : 'nn', 'co2' : 'nn'},
-                'zbc' : {'sub' : 'nn','o2' : 'nn', 'suc' : 'nn', 'co2' : 'nn'}},
+                'zbc' : {'sub' : 'nn','o2' : 'nd', 'suc' : 'nn', 'co2' : 'nd'}},
                 'Diff_c' : {'sub' : 0,'o2' : 2.30e-9, 'suc' : 5.2e-10,'co2' : 1.9e-09},
                 'Dimensions' : [float(x) for x in args.dims.split(',')],'SucRatio' : SucRatio,'Replicates' : int(args.reps)
 
