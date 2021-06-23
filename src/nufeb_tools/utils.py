@@ -223,36 +223,7 @@ class get_data:
         temp = (df[df.ID ==id][['x','y','z']].squeeze() - df[df.ID !=id][['x','y','z']])**2
         dist = pd.Series(np.sqrt(temp.x + temp.y + temp.z),name='Distance')
         return pd.concat([df[df.ID !=id][['ID','type']],dist],axis=1).reset_index(drop=True)
-    def get_grid_idx(array,value):
-        """
-        Find the nutrient grid index value. Taken from https://stackoverflow.com/questions/2566412/find-nearest-value-in-numpy-array.
 
-        Args:
-            array (numpy.array):
-                1D Array containing the grid positions
-            value (float):
-                Cell location to map to the grid
-        Returns:
-            index (int):
-                Grid index
-        """
-        n = len(array)
-
-        jl = 0# Initialize lower
-        ju = n-1# and upper limits.
-        while (ju-jl > 1):# If we are not yet done,
-            jm=(ju+jl) >> 1# compute a midpoint with a bitshift
-            if (value >= array[jm]):
-                jl=jm# and replace either the lower limit
-            else:
-                ju=jm# or the upper limit, as appropriate.
-            # Repeat until the test condition is satisfied.
-        if (value == array[0]):# edge cases at bottom
-            return 0
-        elif (value == array[n-1]):# and top
-            return n-1
-        else:
-            return jl
     def get_local_con(self,nutrient,timestep,cellID):
         """
         Get the local nutrient concentration of a cell
@@ -271,10 +242,44 @@ class get_data:
         """
         cell_locs = self.get_positions(timestep)
         grid = [np.linspace(0,self.metadata['Dimensions'][x],self.dims[x]) for x in range(3)]
-        grid_loc = [self.get_grid_idx(grid[i],cell_locs[cell_locs.ID ==cellID][d].values[0]) for i,d in enumerate(['x','y','z'])]
-        return self.h5['concentration'][nutrient][str(timestep)][grid_loc[2],grid_loc[0],grid_loc[1]]
+        grid_loc = [get_grid_idx(grid[i],cell_locs[cell_locs.ID ==cellID][d].values[0]) for i,d in enumerate(['x','y','z'])]
+        if self.h5['concentration'].__contains__(nutrient):
+            return self.h5['concentration'][nutrient][str(timestep)][grid_loc[2],grid_loc[0],grid_loc[1]]
+        else:
+            nutes = list(self.h5['concentration'].__iter__())
+            print('Nutrient ' + nutrient + ' not found. Try:')
+            print(*nutes)
 
-             
+def get_grid_idx(array,value):
+    """
+    Find the nutrient grid index value. Taken from https://stackoverflow.com/questions/2566412/find-nearest-value-in-numpy-array.
+
+    Args:
+        array (numpy.array):
+            1D Array containing the grid positions
+        value (float):
+            Cell location to map to the grid
+    Returns:
+        index (int):
+            Grid index
+    """
+    n = len(array)
+
+    jl = 0# Initialize lower
+    ju = n-1# and upper limits.
+    while (ju-jl > 1):# If we are not yet done,
+        jm=(ju+jl) >> 1# compute a midpoint with a bitshift
+        if (value >= array[jm]):
+            jl=jm# and replace either the lower limit
+        else:
+            ju=jm# or the upper limit, as appropriate.
+        # Repeat until the test condition is satisfied.
+    if (value == array[0]):# edge cases at bottom
+        return 0
+    elif (value == array[n-1]):# and top
+        return n-1
+    else:
+        return jl             
 def download_test_data(urls=urls):
     """
     Get an example dataset from the Github repo. Downloads to "home/.nufeb_tools/data"
