@@ -24,4 +24,5 @@ jobs:
     - name: Test with tox
       run: 
         tox -e clean
+        tox -e build
         tox -e py
