@@ -128,7 +128,7 @@ def growth_curve_panel(df,**kwargs):
         elif celltype ==2:
             color = '#de2d26'
         elif celltype ==0:
-            print('Celltype is 0',i,c,celltype,t)
+            print('Celltype is 0',i,celltype)
         axs[i-1].plot(df[(df.id==i)].biomass.values,c=color)
         #axs[i].set_title(f['type']['0'][c])
     for ax in axs:

@@ -270,7 +270,7 @@ def main(args):
         # TODO actually make this work
             df_api = API()
             df_api.setContext('p/eng107')
-            collectionName = f'NUFEB_{culture.n_cyanos}_{culture.n_ecw}_{culture.SucPct}_{today}_{x}_{y}_{z}'
+            collectionName = f'NUFEB_{n_cyanos}_{n_ecw}_{SucPct}_{today}_{x}_{y}_{z}'
             parent_collection = df_api.getAuthUser().split('/')[1]
             coll_msg = df_api.collectionCreate(collectionName,
                                             parent_id=parent_collection)
