@@ -33,7 +33,9 @@ jobs:
         if [ -f docs/requirements.txt ]; then pip install -r docs/requirements.txt; fi
         pip install setuptools wheel twine build
     - name: Build package
-      run: python setup.py sdist bdist_wheel
+      run: |
+        pip install .
+        python setup.py sdist bdist_wheel
     - name: Publish distribution build to Test PyPI
       uses: pypa/gh-action-pypi-publish@master
       with:
