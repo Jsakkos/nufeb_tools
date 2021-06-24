@@ -355,6 +355,7 @@ def upload_datafed(file, title, collection_id,metadata_file):
     filename = file
     file_title= title
     global_coll_id = collection_id
+    from datafed.CommandLib import API
     df_api = API()
     if metadata_file != '':
         pkl_file = metadata_file
