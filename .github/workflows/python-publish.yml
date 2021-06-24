@@ -9,7 +9,10 @@
 name: Upload Python Package
 
 on:
-  release:
+  push:
+    # Sequence of patterns matched against refs/tags
+    tags:
+      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
   
@@ -23,15 +26,14 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python-version: '3.x'
+        python-version: 3.9
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install tox tox-gh-actions build
-    - name: Test with tox
-      run: tox
+        if [ -f docs/requirements.txt ]; then pip install -r docs/requirements.txt; fi
+        pip install setuptools wheel twine build
     - name: Build package
-      run: python -m build
+      run: python setup.py sdist bdist_wheel
     - name: Publish distribution build to Test PyPI
       uses: pypa/gh-action-pypi-publish@master
       with:
