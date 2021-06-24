@@ -1,9 +1,6 @@
 name: testing
 
-on:
-  workflow_dispatch:
-  - push
-  #- pull_request
+on: [push]
 
 jobs:
   build:
