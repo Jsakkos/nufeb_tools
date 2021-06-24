@@ -40,7 +40,7 @@ def parse_args(args):
     parser.add_argument('--c',dest='culture_type',action='store',default='co',
                         help='Set culture conditions with --c (co-culture), --ax-c (cyano), --ax-e (e.coli)')
     parser.add_argument('--co2', dest='co2', action='store',
-                    default=6.9e-1,
+                    default=6.8e-1,
                     help='Set initial CO2 concentration (mM)')
     parser.add_argument('--d', dest='dims', action='store', type=str,
                     default='1e-4,1e-4,1e-5',
@@ -270,7 +270,7 @@ def main(args):
         # TODO actually make this work
             df_api = API()
             df_api.setContext('p/eng107')
-            collectionName = f'NUFEB_{culture.n_cyanos}_{culture.n_ecw}_{culture.SucPct}_{x}_{y}_{z}'
+            collectionName = f'NUFEB_{culture.n_cyanos}_{culture.n_ecw}_{culture.SucPct}_{today}_{x}_{y}_{z}'
             parent_collection = df_api.getAuthUser().split('/')[1]
             coll_msg = df_api.collectionCreate(collectionName,
                                             parent_id=parent_collection)
