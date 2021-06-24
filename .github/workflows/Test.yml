@@ -24,7 +24,7 @@ jobs:
           if [ -f docs/requirements.txt ]; then pip install -r docs/requirements.txt; fi
       - name: Run Tox
         # Run tox using the version of Python in `PATH`
-        run: tox -e py
+        run: tox
      # - name: Test
      #   run: |
       #    pytest
