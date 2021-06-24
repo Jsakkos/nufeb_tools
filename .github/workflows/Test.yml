@@ -20,8 +20,11 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pytest pytest-cov
+          pip install pytest pytest-cov tox
           if [ -f docs/requirements.txt ]; then pip install -r docs/requirements.txt; fi
-      - name: Test
-        run: |
-          pytest
+      - name: Run Tox
+        # Run tox using the version of Python in `PATH`
+        run: tox -e py
+     # - name: Test
+     #   run: |
+      #    pytest
