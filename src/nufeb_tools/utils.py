@@ -219,6 +219,7 @@ class get_data:
             df (pandas.DataFrame):
                 Dataframe containing ID, type, Distance
         """
+        # TODO Speed up or parallelize this computation
         df = self.get_positions(timepoint)
         temp = (df[df.ID ==id][['x','y','z']].squeeze() - df[df.ID !=id][['x','y','z']])**2
         dist = pd.Series(np.sqrt(temp.x + temp.y + temp.z),name='Distance')
@@ -262,6 +263,7 @@ class get_data:
             fitness (float):
                 The Monod growth rate (1/s)
         """
+        # TODO Speed up or parallelize this computation
         if self.h5['type'].__contains__(str(timestep)): 
             cell_type = self.h5['type'][str(timestep)][np.where(self.h5['id'][str(timestep)].__array__() == cellID)[0][0]]
         else:
