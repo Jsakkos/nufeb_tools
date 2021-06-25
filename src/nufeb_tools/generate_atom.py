@@ -92,6 +92,8 @@ def setup_logging(loglevel):
     )
 
 def clean():
+    """Remove old NUFEB runs
+    """
     if os.path.isdir('runs'):
         import shutil
         try:
