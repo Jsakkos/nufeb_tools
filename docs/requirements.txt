@@ -17,3 +17,4 @@ seaborn
 tqdm
 scipy
 pytest
+itertools

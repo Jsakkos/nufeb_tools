@@ -8,26 +8,29 @@ import matplotlib.pyplot as plt
 from scipy.signal import find_peaks
 from scipy.optimize import curve_fit
 import time
-import dask
-import dask.array as da
-import dask.dataframe as dd
+# import dask
+# import dask.array as da
+# import dask.dataframe as dd
 from itertools import combinations
 from scipy.spatial.distance import pdist,squareform
 
 #%%
-x = utils.get_data(directory= r'D:\runs\Run_33_66_72_1_2021-06-24')
+x = utils.get_data(test=True)
 df = x.positions
 #%%
-timestep = 0
+timestep = 10000
 combs = list(combinations(df[df.Timestep==timestep].ID,2))
 df2 = df[df.Timestep == timestep].set_index(['ID'])
+df2.sort_index(inplace=True)
 # distances =pdist(df2[['x','y','z']])
 pairwise = pd.DataFrame(
     squareform(pdist(df2[['x','y','z']])),
     columns = df2.index,
     index = df2.index
 )
-sns.heatmap(pairwise)
+pairwise[pairwise ==0] = np.nan
+vmin = pairwise.min().min()
+sns.heatmap(pairwise,vmin=vmin)
 # pdist(df[(df.Timestep==0) & (df.ID==1)][['x','y','z']].values,df[(df.Timestep==0) & (df.ID==2)][['x','y','z']].values)
 #dist = np.sqrt(((df[(df.Timestep==0) & (df.ID==1)][['x','y','z']].squeeze() - df[(df.Timestep==0) & (df.ID==95)][['x','y','z']].squeeze())**2).sum())
 # temp = (df[df.ID ==id][['x','y','z']].squeeze() - df[df.ID !=id][['x','y','z']])**2

@@ -12,7 +12,7 @@ import json
 from urllib.parse import urlparse
 from urllib.request import urlretrieve
 import tarfile
-import dask
+from scipy.spatial.distance import pdist,squareform
 from nufeb_tools import __version__
 
 urls= ['https://github.com/Jsakkos/nufeb-tools/raw/main/data/runs.tar']
@@ -234,6 +234,18 @@ class get_data:
         temp = (df[df.ID ==id][['x','y','z']].squeeze() - df[df.ID !=id][['x','y','z']])**2
         dist = pd.Series(np.sqrt(temp.x + temp.y + temp.z),name='Distance')
         return pd.concat([df[df.ID !=id][['ID','type']],dist],axis=1).reset_index(drop=True)
+    def get_neighbors(self,timestep):
+        df = self.positions
+        df2 = df[df.Timestep == timestep].set_index(['ID'])
+        df2.sort_index(inplace=True)
+        # distances =pdist(df2[['x','y','z']])
+        pairwise = pd.DataFrame(
+            squareform(pdist(df2[['x','y','z']])),
+            columns = df2.index,
+            index = df2.index
+        )
+        pairwise[pairwise ==0] = np.nan
+        return pairwise
 
     def get_local_con(self,nutrient,timestep,cellID):
         """
