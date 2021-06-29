@@ -12,6 +12,7 @@ import json
 from urllib.parse import urlparse
 from urllib.request import urlretrieve
 import tarfile
+import dask
 from nufeb_tools import __version__
 
 urls= ['https://github.com/Jsakkos/nufeb-tools/raw/main/data/runs.tar']
@@ -64,6 +65,7 @@ class get_data:
             self.numsteps = len(self.timepoints)
         except AttributeError:
             print('Missing HDF5 file')
+        self.collect_positions()
         
     def get_local_data(self):
         """
@@ -199,13 +201,21 @@ class get_data:
         
         Returns:
             df (pandas.DataFrame):
-                Dataframe containing ID, type,x, y, z columns
+                Dataframe containing Timestep, ID, type,x, y, z columns
         """
-        return pd.concat([pd.Series(self.h5['id'][str(timepoint)],name='ID'),
+        return pd.concat([pd.Series(np.ones(self.h5['x'][str(timepoint)].len())*int(timepoint),dtype=int,name='Timestep'),
+        pd.Series(self.h5['id'][str(timepoint)],name='ID'),
         pd.Series(self.h5['type'][str(timepoint)],name='type'),
         pd.Series(self.h5['x'][str(timepoint)],name='x'),
         pd.Series(self.h5['y'][str(timepoint)],name='y'),
         pd.Series(self.h5['z'][str(timepoint)],name='z')],axis=1)
+    def collect_positions(self):
+        """get cell locations for all timesteps and aggregate into a dataframe
+        """
+        dfs = list()
+        for t in self.timepoints:
+            dfs.append(self.get_positions(t))
+        self.positions = pd.concat(dfs)
     def get_neighbor_distance(self,id,timepoint):
         """
         Get the nearest neighbor cell distances
@@ -220,7 +230,7 @@ class get_data:
                 Dataframe containing ID, type, Distance
         """
         # TODO Speed up or parallelize this computation
-        df = self.get_positions(timepoint)
+        df = self.positions.set_index(['Timepoint','ID'])
         temp = (df[df.ID ==id][['x','y','z']].squeeze() - df[df.ID !=id][['x','y','z']])**2
         dist = pd.Series(np.sqrt(temp.x + temp.y + temp.z),name='Distance')
         return pd.concat([df[df.ID !=id][['ID','type']],dist],axis=1).reset_index(drop=True)
