@@ -226,7 +226,7 @@ class get_data:
             timepoint (int):
                 The timepoint to check the neighbor distances from
         Returns:
-            df (pandas.DataFrame):
+            (pandas.DataFrame):
                 Dataframe containing ID, type, Distance
         """
         # TODO Speed up or parallelize this computation
@@ -235,6 +235,17 @@ class get_data:
         dist = pd.Series(np.sqrt(temp.x + temp.y + temp.z),name='Distance')
         return pd.concat([df[df.ID !=id][['ID','type']],dist],axis=1).reset_index(drop=True)
     def get_neighbors(self,timestep):
+        """
+        Get the nearest neighbor cell distances
+
+        Args:
+            timestep (int): 
+                The timepoint to check the neighbor distances from
+
+        Returns:
+            pd.DataFrame:
+                Pandas dataframe containing pairwise neighbor distances
+        """
         df = self.positions
         df2 = df[df.Timestep == timestep].set_index(['ID'])
         df2.sort_index(inplace=True)
