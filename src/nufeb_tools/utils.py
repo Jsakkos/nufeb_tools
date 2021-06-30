@@ -230,7 +230,7 @@ class get_data:
                 Dataframe containing ID, type, Distance
         """
         # TODO Speed up or parallelize this computation
-        df = self.positions.set_index(['Timepoint','ID'])
+        df = self.get_positions(timepoint)
         temp = (df[df.ID ==id][['x','y','z']].squeeze() - df[df.ID !=id][['x','y','z']])**2
         dist = pd.Series(np.sqrt(temp.x + temp.y + temp.z),name='Distance')
         return pd.concat([df[df.ID !=id][['ID','type']],dist],axis=1).reset_index(drop=True)
