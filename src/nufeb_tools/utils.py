@@ -175,7 +175,7 @@ class get_data:
                 # make sure cell id matches id of interest
                 i = np.where(arr == c)[0][0]
                 # get radius
-                radius = self.h5[self.radius_key(t)][i]
+                radius = self.h5['radius'][t][i]
                 volume = 4/3*np.pi*radius**3 #volume in m^3
                 # get celltype
                 celltype=self.h5['type'][t][i]
