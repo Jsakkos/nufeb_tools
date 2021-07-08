@@ -2,7 +2,7 @@
 nufeb_tools
 ===========
 
-|docs|  |pypi|  |tests| |deploy|
+|docs|  |pypi|  |tests|
 
 Description
 ===========
@@ -36,5 +36,3 @@ Remove old runs::
 .. |tests| image:: https://github.com/Jsakkos/nufeb-tools/actions/workflows/Test.yml/badge.svg
         :alt: Tox testing status
 
-.. |deploy| image:: https://github.com/Jsakkos/nufeb_tools/actions/workflows/python-publish.yml/badge.svg
-        :alt: Deployment status
