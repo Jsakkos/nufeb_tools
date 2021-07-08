@@ -10,6 +10,7 @@ from datafed.CommandLib import API
 import logging
 from nufeb_tools import __version__
 from pathlib import Path
+from glob import glob
 
 
 
@@ -100,6 +101,10 @@ def clean():
             shutil.rmtree('runs')
         except OSError as e:
             print("Error: %s : %s" % ('runs', e.strerror))
+    slurm_path = glob('*.slurm')
+    if slurm_path:
+        for file in slurm_path:
+            os.remove(file)
 
 def main(args):
     """Wrapper function to generate new NUFEB simulation conditions
@@ -245,8 +250,8 @@ def main(args):
         dumpfile.close()
         #write Inputscript
         #open the file
-        #filein = importlib.resources.read_text("nufeb_tools.templates", "Inputscript.txt")
-        filein = open( TEMPLATES_DIR / 'Inputscript.txt' )
+
+        filein = open( TEMPLATES_DIR / 'inputscript.txt' )
         #read it
         src = Template( filein.read() )
         #do the substitution
@@ -282,21 +287,19 @@ def main(args):
 
         #write slurm script
         #open the file
-        filein = open( TEMPLATES_DIR / 'Slurm.txt' )
-        #filein = importlib.resources.read_text("nufeb_tools.templates", "Slurm.txt")
+        filein = open( TEMPLATES_DIR / 'slurm.txt' )
+        
         #read it
         src = Template( filein.read() )
         #do the substitution
-        result = src.safe_substitute({'n' : n, 'job' : f"NUFEB_cyano{n}",
-                                        'USER' : args.user,'Replicates'  : args.reps,
-                                        'SucPct' : SucPct,'n_cyanos' : n_cyanos,
-                                        'n_ecw' : n_ecw,'id': global_coll_id})
-        f= open(RUN_DIR / f"Inputscript_{n_cyanos}_{n_ecw}_{SucPct}_{today}.slurm","w+")
+        result = src.safe_substitute({'job' : f"NUFEB_{n}",
+                                        'USER' : args.user})
+        f= open(f"NUFEB_{today}.slurm","w+")
         f.writelines(result)
         #write local run script
         #open the file
         filein = open( TEMPLATES_DIR / 'local.txt' )
-        #filein = importlib.resources.read_text("nufeb_tools.templates", "local.txt")
+        
         #read it
         src = Template( filein.read() )
         #do the substitution

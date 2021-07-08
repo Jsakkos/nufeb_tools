@@ -425,7 +425,7 @@ def main(args):
 
         #write Inputscript
         #open the file
-        filein = open( TEMPLATES_DIR / 'Bacillus.txt' )
+        filein = open( TEMPLATES_DIR / 'bacillus.txt' )
         #filein = resources.read_text("nufeb_tools.templates", "Bacillus.txt")
         #read it
         src = Template( filein.read() )
@@ -491,7 +491,7 @@ def main(args):
         f.writelines(result)
     #write slurm script
     #open the file
-    filein = open( TEMPLATES_DIR / 'Slurm.txt' )
+    filein = open( TEMPLATES_DIR / 'slurm_dev.txt' )
     #filein = resources.read_text("nufeb_tools.templates", "Slurm.txt")
     #read it
     src = Template( filein.read() )

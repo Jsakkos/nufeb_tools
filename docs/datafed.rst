@@ -1,6 +1,11 @@
 DataFed Integration
 ===================
 
+Quick Upload
+------------
+.. autofunction:: nufeb_tools.storage.upload_datafed
+
+
 Verify Connection
 -----------------
 .. autofunction:: nufeb_tools.utils.verify_datafed_connection
