@@ -141,6 +141,7 @@ class get_data:
         self.convert_units_avg_con()
         self.convert_units_biomass()
     #print(dv_resp)
+    # TODO remove this function
     def radius_key(self,timestep):
         """
         Generate the appropriate key for a radius at a given timestep
@@ -155,6 +156,7 @@ class get_data:
         >>> radius_key(ts)
         """
         return(f"radius{timestep}")
+        # TODO speed up calculate of biomass
     def single_cell_growth(self,timepoint=0):
         """
         Extract single cell biomass over time from the HDF5 data. 

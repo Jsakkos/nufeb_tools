@@ -8,7 +8,8 @@ def test_local_import():
     import os
     if os.path.isdir(str((Path.home()) / '.nufeb_tools' / 'data' / 'Run_26_90_83_1')):
         x = utils.get_data(directory=str((Path.home()) / '.nufeb_tools' / 'data' / 'Run_26_90_83_1'))
-#def test_datafed_import():
- #   from nufeb_tools import utils
- #   utils.verify_datafed_connection()
-  #  x= utils.get_data(id='c/47146695')
+def test_single_cell_biomass():
+    from nufeb_tools import utils
+    x = utils.get_data(test=True)
+    x.single_cell_growth()
+

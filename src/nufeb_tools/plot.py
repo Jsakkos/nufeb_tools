@@ -177,7 +177,7 @@ def growth_rate_div(df, **kwargs):
     axes[0].set_title('S. elongatus')
     axes[1].set_title('E. coli')
     fig.tight_layout()
-    return fig
+    return
 def growth_rate_time(df, period =3):
     """
     Plot a heatmap of the single cell growth rates over time
@@ -219,7 +219,7 @@ def growth_rate_time(df, period =3):
     axes[1].set_title('E. coli')
 
     fig.tight_layout()
-    return fig
+    return
 
 def get_growth_intervals(dataframe,cellID):
     df = dataframe[dataframe.id==cellID].reset_index(drop=True)
@@ -301,4 +301,4 @@ def growth_rate_mu(df, **kwargs):
     axes[0].set_title('S. elongatus')
     axes[1].set_title('E. coli')
     fig.tight_layout()
-    return fig
+    return
