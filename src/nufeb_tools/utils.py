@@ -57,6 +57,7 @@ class get_data:
             print('Define either a local directory or DataFed Collection ID, not both')
         else:
             print('Missing local directory or DataFed Collection ID')
+        # TODO Make HDF5 file option with graceful fallback
         try:
             self.timepoints = [key for key in self.h5['concentration']['co2'].keys()]
             self.timepoints.sort(key=int)
