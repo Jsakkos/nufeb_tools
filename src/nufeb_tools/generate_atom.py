@@ -168,7 +168,7 @@ def main(args):
                 'ecw': {'StartingCells' : n_ecw,'GrowthRate' : mu_ecw,
             'min_size' : 8.8e-7, 'max_size' : 1.04e-6, 'Density' : 236,
                 'K_s' : {'sub' : 0,'o2' : 1e-3, 'suc' : 3.6,'co2' : 5e-2},
-                'GrowthParams' : {'Yield' : 0.43,'Maintenance' : 9.50e-7,'Decay' : 2e-5}},
+                'GrowthParams' : {'Yield' : 0.43,'Maintenance' : 9.50e-7,'Decay' : 0}},
                 'Nutrients' : {'Concentration' :  {'sub' : 1e-1,'o2' : 9e-3, 'suc' : float(args.sucrose)*SucMW*1e-3, 'co2' : float(args.co2)*CO2MW*1e-3},
                 'State' : {'sub' : 'g','o2' : 'l', 'suc' : 'l', 'co2' : 'l'},
                 'xbc' : {'sub' : 'nn','o2' : 'nn', 'suc' : 'nn', 'co2' : 'nn'},
