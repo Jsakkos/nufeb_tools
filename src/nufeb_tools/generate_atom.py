@@ -64,7 +64,7 @@ def parse_args(args):
                         help='DataFed Upload')
     parser.add_argument('--cells',dest='cells',action='store',default=None,
     help='Number of cyanobacteria and e.coli to initialize simulation with, `e.g., 100,100. ` Default is random number between 1 and 100.')
-    parser.add_argument('--sucR',dest='sucRatio',action='store',default=None,
+    parser.add_argument('--sucR',dest='SucRatio',action='store',default=None,
                     help='Set sucrose secretion ratio (0 to 10). Default is random.')   
 
     parser.add_argument(
