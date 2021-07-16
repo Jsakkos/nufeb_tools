@@ -132,7 +132,7 @@ def main(args):
         os.mkdir('runs')
     today = str(date.today())
     for n in range(1,int(args.num)+1):
-        if args.SucRatio is not none:
+        if args.SucRatio is not None:
             SucRatio = float(args.SucRatio)
         else:
             SucRatio = round(random.random(),3)
