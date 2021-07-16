@@ -122,7 +122,8 @@ def main(args):
     _logger.info("Generating NUFEB simulation files")
     # maximum growth rates, mu
     mu_cyanos = round(0.06/3600,7)
-    mu_ecw = 2.7e-04
+    #mu_ecw = 2.7e-04 for 37C only
+    mu_ecw = 6.71e-5
     # molecular weights of co2 and sucrose for unit conversions
     CO2MW = 44.01
     SucMW = 342.3
