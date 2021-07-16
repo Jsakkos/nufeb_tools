@@ -62,6 +62,8 @@ def parse_args(args):
                     help='CADES/CNMS user ID')
     parser.add_argument('--datafed', dest='datafed', action = 'store', default=False,
                         help='DataFed Upload')
+    parser.add_argument('--cells',dest='cells',action='store',default=None,
+    help='Number of cyanobacteria and e.coli to initialize simulation with, `e.g., 100,100. ` Default is random number between 1 and 100.')
 
     parser.add_argument(
     "-v",
@@ -132,8 +134,12 @@ def main(args):
         SucPct = int(SucRatio*100)
         if args.culture_type == 'co':
             cell_types = ['cyano','ecw']
-            n_cyanos = int(random.uniform(1,100))
-            n_ecw = int(random.uniform(1,100))
+            if args.cells is not None:
+                n_cyanos = int(args.cells.split(',')[0])
+                n_ecw = int(args.cells.split(',')[1])
+            else:
+                n_cyanos = int(random.uniform(1,100))
+                n_ecw = int(random.uniform(1,100))
             n_cells = n_cyanos + n_ecw
             cyGroup = 'group CYANO type 1'
             ecwGroup = 'group ECW type 2'
@@ -141,7 +147,10 @@ def main(args):
             ecwDiv = f'fix d2 ECW divide 100 v_EPSdens v_divDia2 {random.randint(1,1e6)}'
         elif args.culture_type == 'ax-c':
             cell_types = ['cyano']
-            n_cyanos = int(random.uniform(1,100))
+            if args.cells is not None:
+                n_cyanos = int(args.cells.split(',')[0])
+            else:
+                n_cyanos = int(random.uniform(1,100))
             n_ecw = 0
             n_cells = n_cyanos
             cyGroup = 'group CYANO type 1'
@@ -150,7 +159,10 @@ def main(args):
             ecwDiv = ''
         elif args.culture_type == 'ax-e':
             cell_types = ['ecw']
-            n_ecw = int(random.uniform(1,100))
+            if args.cells is not None:
+                n_ecw = int(args.cells.split(',')[1])
+            else:
+                n_ecw = int(random.uniform(1,100))
             n_cyanos=0
             n_cells = n_ecw
             cyGroup = ''
