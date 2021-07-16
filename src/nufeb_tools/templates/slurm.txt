@@ -47,6 +47,7 @@ for dir in runs/*/
 do
 cd "$dir"
 tar -zcf VTK.tar.gz *.vtr *.vtu *.vti
+rm *.vtr *.vtu *.vti
 cd "$base"
 done
 
