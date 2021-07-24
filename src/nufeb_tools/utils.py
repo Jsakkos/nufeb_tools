@@ -209,6 +209,7 @@ class get_data:
         return pd.concat([pd.Series(np.ones(self.h5['x'][str(timepoint)].len())*int(timepoint),dtype=int,name='Timestep'),
         pd.Series(self.h5['id'][str(timepoint)],name='ID'),
         pd.Series(self.h5['type'][str(timepoint)],name='type'),
+        pd.Series(self.h5['radius'][str(timepoint)],name='radius'),
         pd.Series(self.h5['x'][str(timepoint)],name='x'),
         pd.Series(self.h5['y'][str(timepoint)],name='y'),
         pd.Series(self.h5['z'][str(timepoint)],name='z')],axis=1)
@@ -218,7 +219,7 @@ class get_data:
         dfs = list()
         for t in self.timepoints:
             dfs.append(self.get_positions(t))
-        self.positions = pd.concat(dfs)
+        self.positions = pd.concat(dfs,ignore_index=True)
     def get_neighbor_distance(self,id,timepoint):
         """
         Get the nearest neighbor cell distances
@@ -233,7 +234,7 @@ class get_data:
                 Dataframe containing ID, type, Distance
         """
         # TODO Speed up or parallelize this computation
-        df = self.get_positions(timepoint)
+        df = self.positions[self.positions.Timestep==timepoint]
         temp = (df[df.ID ==id][['x','y','z']].squeeze() - df[df.ID !=id][['x','y','z']])**2
         dist = pd.Series(np.sqrt(temp.x + temp.y + temp.z),name='Distance')
         return pd.concat([df[df.ID !=id][['ID','type']],dist],axis=1).reset_index(drop=True)
