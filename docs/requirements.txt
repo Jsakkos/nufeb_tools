@@ -18,4 +18,4 @@ tqdm
 scipy
 pytest
 dask
-pytables
+tables
