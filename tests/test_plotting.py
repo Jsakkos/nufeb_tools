@@ -18,4 +18,4 @@ def growth_rate_plots():
     plot.growth_rate_mu(x.single_cell_biomass)
 def plot_colonies():
     f, ax = plt.subplots()
-    plot.plot_colony(x.colonies,time=100)
+    plot.plot_colony(x,time=100)

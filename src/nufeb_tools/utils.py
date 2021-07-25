@@ -322,30 +322,30 @@ class get_data:
             decay = metadata['GrowthParams']['Decay']
             fitness = metadata['GrowthRate'] * (suc / (metadata['K_s']['suc'] + suc)) * (o2 / (metadata['K_s']['o2'] + o2))
             return fitness - maintenance - decay
-        def get_mothers(self):
-            """
-            Assign mother cells based on initial cells in the simulation.
+    def get_mothers(self):
+        """
+        Assign mother cells based on initial cells in the simulation.
 
-            Returns:
-                pandas.DataFrame:
-                    Dataframe containing ID, type, position, radius, and mother_cell
+        Returns:
+            pandas.DataFrame:
+                Dataframe containing ID, type, position, radius, and mother_cell
 
-            """
-            df = self.positions
-            df['mother_cell'] = -1
-            for ID in df[df.Timestep==0].ID.unique():
-                idx = df[df['ID'] ==ID].index
-                df.loc[idx,'mother_cell'] = ID
-            for time in df.Timestep.unique():
-                arr = df[df.Timestep==time][['x','y']].to_numpy()
-                tree = KDTree(arr)
-                dd, ii = tree.query(arr, k=2)
-                #s = pd.Series(ii[:,1],index=df[df.Timestep==time].index)
-                s = pd.Series(df[df.Timestep==time].reset_index(drop=True).loc[ii[:,1],'ID'].values)
-                idx = df[(df['mother_cell'] ==-1) & (df.Timestep==time)].index
-                df.loc[idx,'mother_cell'] = s[(df['mother_cell'] ==-1) & (df.Timestep==time)]
-            df.mother_cell = df.mother_cell.astype('Int64')
-            self.colonies = df
+        """
+        df = self.positions
+        df['mother_cell'] = -1
+        for ID in df[df.Timestep==0].ID.unique():
+            idx = df[df['ID'] ==ID].index
+            df.loc[idx,'mother_cell'] = ID
+        for time in df.Timestep.unique():
+            arr = df[df.Timestep==time][['x','y']].to_numpy()
+            tree = KDTree(arr)
+            dd, ii = tree.query(arr, k=2)
+            #s = pd.Series(ii[:,1],index=df[df.Timestep==time].index)
+            s = pd.Series(df[df.Timestep==time].reset_index(drop=True).loc[ii[:,1],'ID'].values)
+            idx = df[(df['mother_cell'] ==-1) & (df.Timestep==time)].index
+            df.loc[idx,'mother_cell'] = s[(df['mother_cell'] ==-1) & (df.Timestep==time)]
+        df.mother_cell = df.mother_cell.astype('Int64')
+        self.colonies = df
 
 def get_grid_idx(array,value):
     """
