@@ -303,12 +303,12 @@ def growth_rate_mu(df, **kwargs):
     axes[1].set_title('E. coli')
     fig.tight_layout()
     return
-def plot_colony(df,time,id=None,ax=None,**kwargs):
+def plot_colony(obj,time,id=None,ax=None,**kwargs):
     """Plot bacterial colonies at a specific timepoint
 
     Args:
-        df (pandas.DataFrame): 
-            Dataframe containing cell positions and mother cell ID.
+        obj (nufeb_tools.utils.get_data): 
+            Object containing cell positions and mother cell ID.
         time (int): 
             Timestep to plot
         id (int, optional): 
@@ -324,6 +324,7 @@ def plot_colony(df,time,id=None,ax=None,**kwargs):
     ax = ax or plt.gca()
     timepoint = time
     scale = 1
+    df = obj.colonies
     tp = df[df.Timestep == timepoint]
     img_size = 2000
     bk = 255 * np.ones(shape=[img_size, img_size, 3], dtype=np.uint8)
@@ -333,9 +334,9 @@ def plot_colony(df,time,id=None,ax=None,**kwargs):
         if not colony_type.empty:
 
             for cell in tp[tp.mother_cell==colony].itertuples():
-                xloc = round(cell[5]/x.metadata['Dimensions'][0]*img_size)
-                yloc = round(cell[6]/x.metadata['Dimensions'][1]*img_size)
-                radius = round(cell[4]/x.metadata['Dimensions'][0]*img_size*scale)
+                xloc = round(cell[5]/obj.metadata['Dimensions'][0]*img_size)
+                yloc = round(cell[6]/obj.metadata['Dimensions'][1]*img_size)
+                radius = round(cell[4]/obj.metadata['Dimensions'][0]*img_size*scale)
                 
                 cv2.circle(bk,center = (xloc,yloc),radius = radius,color = (int(colors[0]),int(colors[1]),int(colors[2])),thickness = -1)
     ax.imshow(bk)
