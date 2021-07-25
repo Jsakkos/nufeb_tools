@@ -16,3 +16,6 @@ def growth_rate_plots():
     plot.growth_rate_div(x.single_cell_biomass)
     plot.growth_rate_time(x.single_cell_biomass)
     plot.growth_rate_mu(x.single_cell_biomass)
+def plot_colonies():
+    f, ax = plt.subplots()
+    plot.plot_colony(x.colonies,time=100)

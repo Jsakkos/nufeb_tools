@@ -13,6 +13,7 @@ from urllib.parse import urlparse
 from urllib.request import urlretrieve
 import tarfile
 from scipy.spatial.distance import pdist,squareform
+from scipy.spatial import KDTree
 from nufeb_tools import __version__
 
 urls= ['https://github.com/Jsakkos/nufeb-tools/raw/main/data/runs.tar']
@@ -67,6 +68,7 @@ class get_data:
         except AttributeError:
             print('Missing HDF5 file')
         self.collect_positions()
+        self.get_mothers()
         
     def get_local_data(self):
         """
@@ -203,7 +205,7 @@ class get_data:
                 The simulation timestep to get the position data from.
         
         Returns:
-            df (pandas.DataFrame):
+            pandas.DataFrame:
                 Dataframe containing Timestep, ID, type,x, y, z columns
         """
         return pd.concat([pd.Series(np.ones(self.h5['x'][str(timepoint)].len())*int(timepoint),dtype=int,name='Timestep'),
@@ -230,7 +232,7 @@ class get_data:
             timepoint (int):
                 The timepoint to check the neighbor distances from
         Returns:
-            (pandas.DataFrame):
+            pandas.DataFrame:
                 Dataframe containing ID, type, Distance
         """
         # TODO Speed up or parallelize this computation
@@ -297,7 +299,7 @@ class get_data:
             cellID (int):
                 The cell identification number
         Returns:
-            fitness (float):
+            float:
                 The Monod growth rate (1/s)
         """
         # TODO Speed up or parallelize this computation
@@ -320,6 +322,30 @@ class get_data:
             decay = metadata['GrowthParams']['Decay']
             fitness = metadata['GrowthRate'] * (suc / (metadata['K_s']['suc'] + suc)) * (o2 / (metadata['K_s']['o2'] + o2))
             return fitness - maintenance - decay
+        def get_mothers(self):
+            """
+            Assign mother cells based on initial cells in the simulation.
+
+            Returns:
+                pandas.DataFrame:
+                    Dataframe containing ID, type, position, radius, and mother_cell
+
+            """
+            df = self.positions
+            df['mother_cell'] = -1
+            for ID in df[df.Timestep==0].ID.unique():
+                idx = df[df['ID'] ==ID].index
+                df.loc[idx,'mother_cell'] = ID
+            for time in df.Timestep.unique():
+                arr = df[df.Timestep==time][['x','y']].to_numpy()
+                tree = KDTree(arr)
+                dd, ii = tree.query(arr, k=2)
+                #s = pd.Series(ii[:,1],index=df[df.Timestep==time].index)
+                s = pd.Series(df[df.Timestep==time].reset_index(drop=True).loc[ii[:,1],'ID'].values)
+                idx = df[(df['mother_cell'] ==-1) & (df.Timestep==time)].index
+                df.loc[idx,'mother_cell'] = s[(df['mother_cell'] ==-1) & (df.Timestep==time)]
+            df.mother_cell = df.mother_cell.astype('Int64')
+            self.colonies = df
 
 def get_grid_idx(array,value):
     """

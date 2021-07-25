@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from scipy.signal import find_peaks
 from scipy.optimize import curve_fit
 import numpy as np
+import cv2
 
 def overall_growth(df,ax=None, **kwargs):
     """
@@ -302,3 +303,42 @@ def growth_rate_mu(df, **kwargs):
     axes[1].set_title('E. coli')
     fig.tight_layout()
     return
+def plot_colony(df,time,id=None,ax=None,**kwargs):
+    """Plot bacterial colonies at a specific timepoint
+
+    Args:
+        df (pandas.DataFrame): 
+            Dataframe containing cell positions and mother cell ID.
+        time (int): 
+            Timestep to plot
+        id (int, optional): 
+            Plot a specific colony ID, based on the mother cell ID. Defaults to None.
+        ax (matplotlib.pyplot.axes, optional): 
+            Axes object. Defaults to None.
+
+
+    Returns:
+            matplotlib.pyplot.axes: 
+                Axes object.
+    """
+    ax = ax or plt.gca()
+    timepoint = time
+    scale = 1
+    tp = df[df.Timestep == timepoint]
+    img_size = 2000
+    bk = 255 * np.ones(shape=[img_size, img_size, 3], dtype=np.uint8)
+    for i, colony in enumerate(tp.mother_cell.unique()):
+        colony_type = tp[tp.mother_cell==colony].type
+        colors = tuple(np.random.randint(0,256, 3).astype('int'))
+        if not colony_type.empty:
+
+            for cell in tp[tp.mother_cell==colony].itertuples():
+                xloc = round(cell[5]/x.metadata['Dimensions'][0]*img_size)
+                yloc = round(cell[6]/x.metadata['Dimensions'][1]*img_size)
+                radius = round(cell[4]/x.metadata['Dimensions'][0]*img_size*scale)
+                
+                cv2.circle(bk,center = (xloc,yloc),radius = radius,color = (int(colors[0]),int(colors[1]),int(colors[2])),thickness = -1)
+    ax.imshow(bk)
+    ax.axes.xaxis.set_visible(False)
+    ax.axes.yaxis.set_visible(False)
+    return ax
