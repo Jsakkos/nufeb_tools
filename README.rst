@@ -39,7 +39,7 @@ Plot the overall growth
     f, ax = plt.subplots()
     plot.overall_growth(x.biomass,ax=ax)
 
-.. image:: docs/_static/images/total_biomass_vs_time.png
+.. image:: _static/images/total_biomass_vs_time.png
    :align: center
 
 
