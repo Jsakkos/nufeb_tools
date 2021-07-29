@@ -24,6 +24,24 @@ Remove old runs::
 
         nufeb-clean
 
+Get data from a simulation for analysis
+
+.. code-block:: python
+
+    from nufeb_tools import utils
+    x = utils.get_data(directory= r'D:\runs\Run_35_37_67_1_2021-07-07')
+
+Plot the overall growth
+
+.. code-block:: python
+
+    from nufeb_tools import plot
+    f, ax = plt.subplots()
+    plot.overall_growth(x.biomass,ax=ax)
+
+.. image:: docs/_static/images/total_biomass_vs_time.png
+   :align: center
+
 
 
 .. |docs| image:: https://readthedocs.org/projects/nufeb-tools/badge/?version=latest
