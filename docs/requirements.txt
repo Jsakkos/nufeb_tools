@@ -17,3 +17,5 @@ seaborn
 tqdm
 scipy
 pytest
+dask
+tables
