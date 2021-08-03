@@ -66,6 +66,10 @@ def parse_args(args):
     help='Number of cyanobacteria and e.coli to initialize simulation with, `e.g., 100,100. ` Default is random number between 1 and 100.')
     parser.add_argument('--sucR',dest='SucRatio',action='store',default=None,
                     help='Set sucrose secretion ratio (0 to 10). Default is random.')   
+    parser.add_argument('--muecw',dest='mu_ecw',action='store',default=6.71e-5,type=float,
+                    help='E. coli W maximum growth rate')  
+    parser.add_argument('--mucya',dest='mu_cya',action='store',default=1.67e-5,type=float,
+                    help='E. coli W maximum growth rate')   
 
     parser.add_argument(
     "-v",
@@ -121,9 +125,9 @@ def main(args):
     setup_logging(args.loglevel)
     _logger.info("Generating NUFEB simulation files")
     # maximum growth rates, mu
-    mu_cyanos = round(0.06/3600,7)
+    #$mu_cyanos = round(0.06/3600,7)
     #mu_ecw = 2.7e-04 for 37C only
-    mu_ecw = 6.71e-5
+    #mu_ecw = 6.71e-5
     # molecular weights of co2 and sucrose for unit conversions
     CO2MW = 44.01
     SucMW = 342.3
@@ -175,15 +179,15 @@ def main(args):
             ecwGroup = 'group ECW type 1'
             cyDiv = ''
             ecwDiv = f'fix d2 ECW divide 100 v_EPSdens v_divDia2 {random.randint(1,1e6)}'
-        RUN_DIR = Path(f'runs/Run_{n_cyanos}_{n_ecw}_{SucPct}_{args.reps}_{today}')
+        RUN_DIR = Path(f'runs/Run_{n_cyanos}_{n_ecw}_{SucPct}_{args.reps}_{today}_{random.randint(1,1e6)}')
         if not os.path.isdir(RUN_DIR):
             os.mkdir(RUN_DIR)
         # TODO embed cell type into metadata file and generate cell type programmatically
-        InitialConditions = {'cyano': {'StartingCells' : n_cyanos,'GrowthRate' : mu_cyanos,
+        InitialConditions = {'cyano': {'StartingCells' : n_cyanos,'GrowthRate' : args.mu_cya,
             'min_size' : 1.37e-6, 'max_size' : 1.94e-6, 'Density' : 370,
                 'K_s' : {'sub' : 3.5e-4,'o2' : 2e-4, 'suc' : 1e-2,'co2' : 1.38e-4},
                 'GrowthParams' : {'Yield' : 0.55,'Maintenance' : 0,'Decay' : 0}},
-                'ecw': {'StartingCells' : n_ecw,'GrowthRate' : mu_ecw,
+                'ecw': {'StartingCells' : n_ecw,'GrowthRate' : args.mu_ecw,
             'min_size' : 8.8e-7, 'max_size' : 1.39e-6, 'Density' : 230,
                 'K_s' : {'sub' : 0,'o2' : 1e-3, 'suc' : 3.6,'co2' : 5e-2},
                 'GrowthParams' : {'Yield' : 0.43,'Maintenance' : 9.50e-7,'Decay' : 0}},
