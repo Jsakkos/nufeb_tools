@@ -49,7 +49,7 @@ class get_data:
         elif directory:
             self.directory = directory
             self.get_local_data()
-            self.sucRatio = int(self.directory.split('_')[-3])
+            self.sucRatio = int(self.directory.split('_')[-4])
         elif id:
             self.id = id
             self.get_datafed_data()
