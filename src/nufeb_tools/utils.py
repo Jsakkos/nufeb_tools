@@ -14,6 +14,8 @@ from urllib.request import urlretrieve
 import tarfile
 from scipy.spatial.distance import pdist,squareform
 from scipy.spatial import KDTree
+from tqdm import tqdm
+import cv2
 from nufeb_tools import __version__
 
 urls= ['https://github.com/Jsakkos/nufeb-tools/raw/main/data/runs.tar']
@@ -68,7 +70,7 @@ class get_data:
         except AttributeError:
             print('Missing HDF5 file')
         self.collect_positions()
-        self.get_mothers()
+
         
     def get_local_data(self):
         """
@@ -336,16 +338,45 @@ class get_data:
         for ID in df[df.Timestep==0].ID.unique():
             idx = df[df['ID'] ==ID].index
             df.loc[idx,'mother_cell'] = ID
-        for time in df.Timestep.unique():
-            arr = df[df.Timestep==time][['x','y']].to_numpy()
-            tree = KDTree(arr)
-            dd, ii = tree.query(arr, k=2)
-            #s = pd.Series(ii[:,1],index=df[df.Timestep==time].index)
-            s = pd.Series(df[df.Timestep==time].reset_index(drop=True).loc[ii[:,1],'ID'].values)
-            idx = df[(df['mother_cell'] ==-1) & (df.Timestep==time)].index
-            df.loc[idx,'mother_cell'] = s[(df['mother_cell'] ==-1) & (df.Timestep==time)]
-        df.mother_cell = df.mother_cell.astype('Int64')
+
+        for time in tqdm(sorted(df[df.Timestep!=0].Timestep.unique())):
+            for type_ in df.type.unique():
+                ancestors = df[(df.type==type_) & (df.Timestep==time) & (df.mother_cell != -1)]
+                arr1 = ancestors[['x','y','z']].to_numpy()
+                tree1 = KDTree(arr1)
+                motherless = df[(df.type==type_) & (df.Timestep==time) & (df.mother_cell == -1)]
+                d, i = tree1.query(motherless[['x','y','z']].to_numpy(), k=2)
+                idx1 =motherless.index
+                a = ancestors.iloc[i[:,1],:].mother_cell.values
+                df.loc[idx1,'mother_cell']=a
         self.colonies = df
+    def count_colony_area(self,timestep):
+        if not hasattr(self,'colonies'):
+            self.get_mothers()
+            df = self.colonies
+        else:
+            df = self.colonies
+        tp = df[df.Timestep == timestep]
+        colonies = sorted(tp[tp.mother_cell != -1].mother_cell.unique())
+        colors = {x :[x]*3 for x in colonies}
+        img_size = 2000
+        bk = 255 * np.ones(shape=[img_size, img_size, 3], dtype=np.uint8)
+        circles = [cv2.circle(bk,center = (round(x/self.metadata['Dimensions'][0]*img_size),
+                    round(y/self.metadata['Dimensions'][1]*img_size)),radius = round(radius/self.metadata['Dimensions'][1]*img_size),
+                    color = (cell,0,0),thickness = -1) for x,y, radius,cell in zip(tp.x,tp.y,tp.radius,tp.mother_cell)]
+        cols, counts = np.unique(bk[:,:,0],return_counts=1)
+        for colony,area in zip(cols[:-1],counts[:-1]):
+            idx = df[(df.mother_cell==int(colony)) & (df.Timestep==timestep)].index
+            df.loc[idx,'Colony Area'] = area
+        self.colonies = df
+    def get_colony_areas(self):
+        if not hasattr(self,'colonies'):
+            self.get_mothers()
+            df = self.colonies
+        else:
+            df = self.colonies
+        for time in tqdm(df.Timestep.unique()):
+            self.count_colony_area(time)
 
 def get_grid_idx(array,value):
     """

@@ -324,6 +324,8 @@ def plot_colony(obj,time,id=None,ax=None,**kwargs):
     ax = ax or plt.gca()
     timepoint = time
     scale = 1
+    if not hasattr(obj,'colonies'):
+        obj.get_mothers()
     df = obj.colonies
     tp = df[df.Timestep == timepoint]
     img_size = 2000
