@@ -303,45 +303,57 @@ def growth_rate_mu(df, **kwargs):
     axes[1].set_title('E. coli')
     fig.tight_layout()
     return
-def plot_colony(obj,time,id=None,ax=None,**kwargs):
-    """Plot bacterial colonies at a specific timepoint
+def colony(obj,time,colors=None,colony=None,ax=None,by=None,**kwargs):
+    """
+    Plot bacterial colonies at a specific timepoint
 
     Args:
         obj (nufeb_tools.utils.get_data): 
-            Object containing cell positions and mother cell ID.
+            Object containing cell locations
         time (int): 
-            Timestep to plot
-        id (int, optional): 
-            Plot a specific colony ID, based on the mother cell ID. Defaults to None.
+            Simulation timestep to plot
+        colors (dict, optional): 
+            Dictionary of colors to plot each colony. Defaults to None.
+        colony (int, optional): 
+            Plot a specific colony. Defaults to None.
         ax (matplotlib.pyplot.axes, optional): 
-            Axes object. Defaults to None.
-
-
-    Returns:
-            matplotlib.pyplot.axes: 
-                Axes object.
+            Axis to plot on. Defaults to None.
+        by (str, optional): 
+            Plot by species. Defaults to None.
     """
-    ax = ax or plt.gca()
-    timepoint = time
-    scale = 1
+
     if not hasattr(obj,'colonies'):
         obj.get_mothers()
     df = obj.colonies
-    tp = df[df.Timestep == timepoint]
+    ax = ax or plt.gca()
+    timepoint = time
+    dims=obj.metadata['Dimensions']
+
     img_size = 2000
     bk = 255 * np.ones(shape=[img_size, img_size, 3], dtype=np.uint8)
-    for i, colony in enumerate(tp.mother_cell.unique()):
-        colony_type = tp[tp.mother_cell==colony].type
-        colors = tuple(np.random.randint(0,256, 3).astype('int'))
-        if not colony_type.empty:
+    if by == 'Species' or by == 'species' or by == 'type':
+        colors = {1 : (26,150,65) ,2 : (230,97,1)}
+        tp = df[df.Timestep == timepoint]
+        circles = [cv2.circle(bk,center = (round(x/dims[0]*img_size),
+                    round(y/dims[1]*img_size)),radius = round(radius/dims[1]*img_size),
+                    color = (int(colors[type_][0]),int(colors[type_][1]),int(colors[type_][2])),thickness = -1) for x,y, radius,type_ in zip(tp.x,tp.y,tp.radius,tp.type)]
+    elif colony == None and by == None:
+        if colors == None:
+            IDs = sorted(df[df.mother_cell != -1].mother_cell.unique())
+            colors = {x : tuple(np.random.randint(0,256, 3).astype('int')) for x in IDs}
+        tp = df[df.Timestep == timepoint]
+        circles = [cv2.circle(bk,center = (round(x/dims[0]*img_size),
+                    round(y/dims[1]*img_size)),radius = round(radius/dims[1]*img_size),
+                    color = (int(colors[cell][0]),int(colors[cell][1]),int(colors[cell][2])),thickness = -1) for x,y, radius,cell in zip(tp.x,tp.y,tp.radius,tp.mother_cell)]
+    else:
+        if colors == None:
+            colors = tuple(np.random.randint(0,256, 3).astype('int'))
+        color = colors
+        tp = df[(df.Timestep == timepoint) & (df.mother_cell==colony)]
+        circles = [cv2.circle(bk,center = (round(x/dims[0]*img_size),
+                    round(y/dims[1]*img_size)),radius = round(radius/dims[1]*img_size),
+                    color = (int(color[0]),int(color[1]),int(color[2])),thickness = -1) for x,y, radius,cell in zip(tp.x,tp.y,tp.radius,tp.mother_cell)]
 
-            for cell in tp[tp.mother_cell==colony].itertuples():
-                xloc = round(cell[5]/obj.metadata['Dimensions'][0]*img_size)
-                yloc = round(cell[6]/obj.metadata['Dimensions'][1]*img_size)
-                radius = round(cell[4]/obj.metadata['Dimensions'][0]*img_size*scale)
-                
-                cv2.circle(bk,center = (xloc,yloc),radius = radius,color = (int(colors[0]),int(colors[1]),int(colors[2])),thickness = -1)
     ax.imshow(bk)
     ax.axes.xaxis.set_visible(False)
     ax.axes.yaxis.set_visible(False)
-    return ax

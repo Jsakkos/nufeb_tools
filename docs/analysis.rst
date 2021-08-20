@@ -96,3 +96,37 @@ Overall Cell Growth
     x = utils.get_data(directory = None,test=True)
     plot.overall_growth(x.biomass,ax=ax)
     f.tight_layout()
+
+Whole Colony Plotting
+^^^^^^^^^^^^^^^^^^^^^
+.. autofunction:: nufeb_tools.plot.colony
+
+.. image:: _static/images/testcolony.png
+   :align: center
+
+.. code-block:: python
+
+    from nufeb_tools import utils, plot
+    import matplotlib.pyplot as plt
+    x = utils.get_data(directory= r'D:\runs\Run_21_18_56_1_2021-07-12')
+    f,ax = plt.subplots()
+    plot.colony(x,35000,colors,ax=ax)
+    plt.show()
+
+Plot colonies over time by species:
+
+.. image:: _static/images/Colonies over time.png
+   :align: center
+
+.. code-block:: python
+
+    from nufeb_tools import utils, plot
+    import matplotlib.pyplot as plt
+    x = utils.get_data(directory= r'D:\runs\Run_21_18_56_1_2021-07-12')
+    f, axes = plt.subplots(ncols=3,figsize=(15,5))
+    for ax, time in zip(axes,[100,20000,35000]):
+        plot.plot_colony(x,time,by='Species',ax=ax)
+    plt.show()
+
+
+

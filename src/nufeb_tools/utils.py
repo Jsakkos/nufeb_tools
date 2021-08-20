@@ -223,7 +223,11 @@ class get_data:
         dfs = list()
         for t in self.timepoints:
             dfs.append(self.get_positions(t))
-        self.positions = pd.concat(dfs,ignore_index=True)
+        temp = pd.concat(dfs,ignore_index=True)
+        idx = temp[temp.type==0].index
+        self.positions = temp.drop(idx).reset_index(drop=True)
+        
+
     def get_neighbor_distance(self,id,timepoint):
         """
         Get the nearest neighbor cell distances
@@ -339,26 +343,32 @@ class get_data:
             idx = df[df['ID'] ==ID].index
             df.loc[idx,'mother_cell'] = ID
 
-        for time in tqdm(sorted(df[df.Timestep!=0].Timestep.unique())):
+        for time in tqdm(sorted(df[df.Timestep!=0].Timestep.unique()),desc='Assigning ancestry'):
             for type_ in df.type.unique():
                 ancestors = df[(df.type==type_) & (df.Timestep==time) & (df.mother_cell != -1)]
                 arr1 = ancestors[['x','y','z']].to_numpy()
                 tree1 = KDTree(arr1)
                 motherless = df[(df.type==type_) & (df.Timestep==time) & (df.mother_cell == -1)]
-                d, i = tree1.query(motherless[['x','y','z']].to_numpy(), k=2)
-                idx1 =motherless.index
-                a = ancestors.iloc[i[:,1],:].mother_cell.values
-                df.loc[idx1,'mother_cell']=a
+                if not motherless.empty:
+                    d, i = tree1.query(motherless[['x','y','z']].to_numpy(), k=1)
+                    idx1 =motherless.index
+                    a = ancestors.iloc[i,:].mother_cell.values
+                    df.loc[idx1,'mother_cell']=a
         self.colonies = df
     def count_colony_area(self,timestep):
+        """
+        Count the 2d area in pixel dimensions of each colony at a given timestep.
+
+        Args:
+            timestep (int):
+                Timestep to count
+        """
         if not hasattr(self,'colonies'):
             self.get_mothers()
             df = self.colonies
         else:
             df = self.colonies
         tp = df[df.Timestep == timestep]
-        colonies = sorted(tp[tp.mother_cell != -1].mother_cell.unique())
-        colors = {x :[x]*3 for x in colonies}
         img_size = 2000
         bk = 255 * np.ones(shape=[img_size, img_size, 3], dtype=np.uint8)
         circles = [cv2.circle(bk,center = (round(x/self.metadata['Dimensions'][0]*img_size),
@@ -367,15 +377,17 @@ class get_data:
         cols, counts = np.unique(bk[:,:,0],return_counts=1)
         for colony,area in zip(cols[:-1],counts[:-1]):
             idx = df[(df.mother_cell==int(colony)) & (df.Timestep==timestep)].index
-            df.loc[idx,'Colony Area'] = area
-        self.colonies = df
+            self.colonies.loc[idx,'Colony Area'] = area
+
     def get_colony_areas(self):
+        """Count colony areas for all timesteps
+        """
         if not hasattr(self,'colonies'):
             self.get_mothers()
             df = self.colonies
         else:
             df = self.colonies
-        for time in tqdm(df.Timestep.unique()):
+        for time in tqdm(df.Timestep.unique(),desc='Counting colony areas'):
             self.count_colony_area(time)
 
 def get_grid_idx(array,value):
