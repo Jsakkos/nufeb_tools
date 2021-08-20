@@ -115,7 +115,7 @@ Whole Colony Plotting
 
 Plot colonies over time by species:
 
-.. image:: _static/images/Colonies over time.png
+.. image:: _static/images/Colonies_over_time.png
    :align: center
 
 .. code-block:: python
