@@ -29,7 +29,7 @@ Get data from a simulation for analysis
 .. code-block:: python
 
     from nufeb_tools import utils
-    x = utils.get_data(directory= r'D:\runs\Run_35_37_67_1_2021-07-07')
+    x = utils.get_data(test=True)
 
 Plot the overall growth
 
@@ -39,7 +39,7 @@ Plot the overall growth
     f, ax = plt.subplots()
     plot.overall_growth(x.biomass,ax=ax)
 
-.. image:: _static/images/total_biomass_vs_time.png
+.. image:: /docs/_static/images/total_biomass_vs_time.png
    :align: center
 
 
