@@ -36,10 +36,25 @@ Plot the overall growth
 .. code-block:: python
 
     from nufeb_tools import plot
+    import matplotlib.pyplot as plt
     f, ax = plt.subplots()
     plot.overall_growth(x.biomass,ax=ax)
 
 .. image:: /docs/_static/images/total_biomass_vs_time.png
+   :align: center
+
+Plot colonies based on initial seed cells
+
+.. code-block:: python
+
+    from nufeb_tools import utils, plot
+    import matplotlib.pyplot as plt
+    x = utils.get_data(directory= r'D:\runs\Run_21_18_56_1_2021-07-12')
+    f,ax = plt.subplots()
+    plot.colony(x,35000,colors,ax=ax)
+    plt.show()
+
+.. image:: /docs/_static/images/testcolony.png
    :align: center
 
 
