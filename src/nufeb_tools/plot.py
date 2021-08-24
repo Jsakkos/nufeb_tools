@@ -89,12 +89,17 @@ def biomass_time(df,id=None,ax=None,legend = None,**kwargs):
     """
     ax = ax or plt.gca()
     #plot cell size vs time
-    palette = sns.color_palette("mako_r", 6)
+    
     if not id:
         print('No cell ID specified')
     else:
         data = df[df.id==id].reset_index()
-        ax.plot(data.time,data.biomass,color='#2ca25f')
+        if data.type.unique()[0] == 1:
+            ax.plot(data.time,data.biomass,color='#2ca25f')
+        elif data.type.unique()[0] ==2:
+            ax.plot(data.time,data.biomass,color='#de2d26')
+        else:
+            ax.plot(data.time,data.biomass,color='k')
 
         for line in find_peaks(data.biomass):
             ax.vlines(data.time[line],data.biomass.min(),data.biomass.max()*1.1,color='#bdbdbd',ls=':')
@@ -303,7 +308,7 @@ def growth_rate_mu(df, **kwargs):
     axes[1].set_title('E. coli')
     fig.tight_layout()
     return
-def colony(obj,time,colors=None,colony=None,ax=None,by=None,**kwargs):
+def colony(obj,time,colors=None,colony=None,ax=None,by=None,img=np.array([]),**kwargs):
     """
     Plot bacterial colonies at a specific timepoint
 
@@ -328,9 +333,12 @@ def colony(obj,time,colors=None,colony=None,ax=None,by=None,**kwargs):
     ax = ax or plt.gca()
     timepoint = time
     dims=obj.metadata['Dimensions']
-
-    img_size = 2000
-    bk = 255 * np.ones(shape=[img_size, img_size, 3], dtype=np.uint8)
+    if img.size==0:
+        img_size = 2000
+        bk = 255 * np.ones(shape=[img_size, img_size, 3], dtype=np.uint8)
+    else:
+        img_size = img.size[0]
+        bk = img
     if by == 'Species' or by == 'species' or by == 'type':
         colors = {1 : (26,150,65) ,2 : (230,97,1)}
         tp = df[df.Timestep == timepoint]

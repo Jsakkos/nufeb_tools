@@ -76,7 +76,7 @@ class get_data:
         """
         Collect NUFEB simulation data from a local directory
         """
-        self.h5 = h5py.File(os.path.join(self.directory,'trajectory.h5'))
+        self.h5 = h5py.File(os.path.join(self.directory,'trajectory.h5'),mode='r')
         self.biomass = pd.read_csv(os.path.join(
             self.directory,'Results','biomass.csv'),
                                    usecols=[0,1,2],delimiter='\t')

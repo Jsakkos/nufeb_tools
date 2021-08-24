@@ -3,6 +3,7 @@ import json
 from datafed.CommandLib import API
 from nufeb_tools import __version__
 
+# TODO Fix datafed uploading
 def upload_datafed():
     """Collect NUFEB simulation data and upload to a DataFed collection
     """
