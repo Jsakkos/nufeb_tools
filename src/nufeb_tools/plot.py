@@ -93,7 +93,7 @@ def biomass_time(df,id=None,ax=None,legend = None,**kwargs):
     if not id:
         print('No cell ID specified')
     else:
-        data = df[df.id==id].reset_index()
+        data = df[df.ID==id].reset_index()
         if data.type.unique()[0] == 1:
             ax.plot(data.time,data.biomass,color='#2ca25f')
         elif data.type.unique()[0] ==2:
@@ -365,3 +365,4 @@ def colony(obj,time,colors=None,colony=None,ax=None,by=None,img=np.array([]),**k
     ax.imshow(bk)
     ax.axes.xaxis.set_visible(False)
     ax.axes.yaxis.set_visible(False)
+    return (ax)

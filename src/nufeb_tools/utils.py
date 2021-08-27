@@ -62,21 +62,27 @@ class get_data:
             print('Missing local directory or DataFed Collection ID')
         # TODO Make HDF5 file option with graceful fallback
         try:
-            self.timepoints = [key for key in self.h5['concentration']['co2'].keys()]
-            self.timepoints.sort(key=int)
-            self.dims = list(self.h5['concentration']['co2']['0'].shape)
             self.dims += [self.dims.pop(0)] # move Z dimension to last: z,x,y to x,y,z
             self.numsteps = len(self.timepoints)
+
+            
         except AttributeError:
             print('Missing HDF5 file')
-        self.collect_positions()
-
+        self.Timesteps = self.positions.Timestep.unique()
+        self.calc_biomass()
         
     def get_local_data(self):
         """
         Collect NUFEB simulation data from a local directory
         """
-        self.h5 = h5py.File(os.path.join(self.directory,'trajectory.h5'),mode='r')
+        h5 = h5py.File(os.path.join(self.directory,'trajectory.h5'),mode='r')
+        self.timepoints = [key for key in h5['concentration']['co2'].keys()]
+        self.timepoints.sort(key=int)
+        self.dims = list(h5['concentration']['co2']['0'].shape)
+        self.nutrients = list(h5['concentration'].keys())
+        self.collect_positions(h5)
+        self.get_nutrient_grid(h5)
+        h5.close()
         self.biomass = pd.read_csv(os.path.join(
             self.directory,'Results','biomass.csv'),
                                    usecols=[0,1,2],delimiter='\t')
@@ -88,7 +94,7 @@ class get_data:
             delimiter='\t',
             names=['Time','O2','Sucrose','CO2'],
             skiprows=1)
-        f = open(os.path.join(self.directory,'metadata.json'),)
+        f = open(os.path.join(self.directory,'metadata.json'),'r')
         self.metadata  = json.load(f)
         f.close()
         self.convert_units_avg_con()
@@ -130,7 +136,14 @@ class get_data:
                             orig_fname=orig_fname,
                             wait=wait,
                             )
-        self.h5 = h5py.File(os.path.join(self.directory,'trajectory.h5'))
+        h5 = h5py.File(os.path.join(self.directory,'trajectory.h5'))
+        self.timepoints = [key for key in h5['concentration']['co2'].keys()]
+        self.timepoints.sort(key=int)
+        self.dims = list(h5['concentration']['co2']['0'].shape)
+        self.nutrients = list(h5['concentration'].keys())
+        self.collect_positions(h5)
+        self.get_nutrient_grid(h5)
+        h5.close()
         self.metadata = json.loads(dv_resp[0].data[0].metadata)
         self.biomass = pd.read_csv(os.path.join(
             self.directory,'biomass.csv'),
@@ -162,8 +175,15 @@ class get_data:
         """
         return(f"radius{timestep}")
         # TODO speed up calculate of biomass
+    def calc_biomass(self):
+        df = self.positions
+        df['biomass'] = 0
+        df.loc[df.type==1,'biomass'] = 4/3*np.pi*df['radius']**3*self.metadata['cyano']['Density']*1e18
+        df.loc[df.type==2,'biomass'] = 4/3*np.pi*df['radius']**3*self.metadata['ecw']['Density']*1e18
+        df['time'] = df['Timestep'].transform(lambda j: j/360)
     def single_cell_growth(self,timepoint=0):
         """
+        Depreciated.
         Extract single cell biomass over time from the HDF5 data. 
 
         Args:
@@ -198,7 +218,7 @@ class get_data:
                 # append data to a dataframe
                 df = df.append(pd.DataFrame([[c,celltype,h,mass]],columns=['id','type','time','biomass']),ignore_index=True)
         self.single_cell_biomass = df
-    def get_positions(self,timepoint=0):
+    def get_positions(h5,timepoint=0):
         """
         Extract the x, y, z position of each cell at a given timepoint
 
@@ -210,19 +230,19 @@ class get_data:
             pandas.DataFrame:
                 Dataframe containing Timestep, ID, type,x, y, z columns
         """
-        return pd.concat([pd.Series(np.ones(self.h5['x'][str(timepoint)].len())*int(timepoint),dtype=int,name='Timestep'),
-        pd.Series(self.h5['id'][str(timepoint)],name='ID'),
-        pd.Series(self.h5['type'][str(timepoint)],name='type'),
-        pd.Series(self.h5['radius'][str(timepoint)],name='radius'),
-        pd.Series(self.h5['x'][str(timepoint)],name='x'),
-        pd.Series(self.h5['y'][str(timepoint)],name='y'),
-        pd.Series(self.h5['z'][str(timepoint)],name='z')],axis=1)
-    def collect_positions(self):
+        return pd.concat([pd.Series(np.ones(h5['x'][str(timepoint)].len())*int(timepoint),dtype=int,name='Timestep'),
+        pd.Series(h5['id'][str(timepoint)],name='ID'),
+        pd.Series(h5['type'][str(timepoint)],name='type'),
+        pd.Series(h5['radius'][str(timepoint)],name='radius'),
+        pd.Series(h5['x'][str(timepoint)],name='x'),
+        pd.Series(h5['y'][str(timepoint)],name='y'),
+        pd.Series(h5['z'][str(timepoint)],name='z')],axis=1)
+    def collect_positions(self,h5):
         """get cell locations for all timesteps and aggregate into a dataframe
         """
         dfs = list()
         for t in self.timepoints:
-            dfs.append(self.get_positions(t))
+            dfs.append(self.get_positions(h5,t))
         temp = pd.concat(dfs,ignore_index=True)
         idx = temp[temp.type==0].index
         self.positions = temp.drop(idx).reset_index(drop=True)
@@ -389,6 +409,81 @@ class get_data:
             df = self.colonies
         for time in tqdm(df.Timestep.unique(),desc='Counting colony areas'):
             self.count_colony_area(time)
+    def get_nutrient_grid(self,h5):
+        keys = list(h5['concentration'].keys())
+        timepoints = [k for k in h5['concentration'][keys[0]].keys()]
+        timepoints.sort(key=int)
+        stacks = list()
+        for key in keys:
+            dfs = list()
+            for time in timepoints:
+                dfs.append(h5['concentration'][key][time])
+            stacks.append(np.stack(dfs))
+        grid = np.stack(stacks,axis=1)
+        self.grid = grid
+        return
+    def get_local_con2(self,timestep,cellID):
+        """
+        Get the local nutrient concentration of a cell
+
+        Args:
+
+            timestep (int):
+                The timestep at which to check the concentration
+            cellID (int):
+                The cell identification number
+        
+        Returns:
+            Nutrient Concentration (float):
+                The concentration of the specified nutrient within the cell's grid
+        """
+        cell_locs = self.positions
+        grid = [np.linspace(0,self.metadata['Dimensions'][x],self.dims[x]) for x in range(3)]
+        grid_loc = [get_grid_idx(grid[i],cell_locs[cell_locs.ID ==cellID][d].values[0]) for i,d in enumerate(['x','y','z'])]
+
+        return self.grid[timestep,:,grid_loc[2],grid_loc[0],grid_loc[1]]
+
+    def get_fitness2(self,timestep,cellID):
+        """
+        Get the fitness of an individual cell based on the relative Monod growth rate at a given timestep
+
+        Args:
+            timestep (int):
+                The timestep at which to check the concentration
+            cellID (int):
+                The cell identification number
+        Returns:
+            float:
+                The Monod growth rate (1/s)
+        """
+            # TODO Speed up or parallelize this computation
+        df = self.positions
+        cell_type = df[(df.Timestep ==timestep) & (df.ID ==cellID)].type.values[0]
+        if df[(df.Timestep ==timestep) & (df.ID ==cellID)].empty:
+            print('Timestep or cell ID not found')
+            return
+        concentrations = self.get_local_con2(list(df.Timestep.unique()).index(timestep),cellID)
+        if cell_type == 1:
+            metadata = self.metadata['cyano']
+            light = concentrations[self.nutrients.index('sub')]
+            co2 = concentrations[self.nutrients.index('co2')]
+            fitness = metadata['GrowthRate'] * (light / (metadata['K_s']['sub'] + light)) * (co2 / (metadata['K_s']['co2'] + co2))
+            return fitness
+        elif cell_type == 2:
+            metadata = self.metadata['ecw']
+            suc = concentrations[self.nutrients.index('suc')]
+            o2 = concentrations[self.nutrients.index('o2')]
+            maintenance = metadata['GrowthParams']['Maintenance'] * (o2 / (metadata['K_s']['o2'] + o2))
+            decay = metadata['GrowthParams']['Decay']
+            fitness = metadata['GrowthRate'] * (suc / (metadata['K_s']['suc'] + suc)) * (o2 / (metadata['K_s']['o2'] + o2))
+            return fitness - maintenance - decay
+    def collect_fitness(self):
+        df = self.positions
+        fitness = pd.DataFrame(columns=['Time','ID','Fitness'])
+        for time in tqdm(self.Timesteps):
+            for cell in df[(df.Timestep==time)].ID:
+                fitness = fitness.append(pd.DataFrame([time,cell,self.get_fitness2(time,cell)],columns=['Time','ID','Fitness']),ignore_index=True)
+        self.fitness=fitness
 
 def get_grid_idx(array,value):
     """
