@@ -218,6 +218,7 @@ class get_data:
                 # append data to a dataframe
                 df = df.append(pd.DataFrame([[c,celltype,h,mass]],columns=['id','type','time','biomass']),ignore_index=True)
         self.single_cell_biomass = df
+
     def get_positions(h5,timepoint=0):
         """
         Extract the x, y, z position of each cell at a given timepoint
@@ -237,12 +238,30 @@ class get_data:
         pd.Series(h5['x'][str(timepoint)],name='x'),
         pd.Series(h5['y'][str(timepoint)],name='y'),
         pd.Series(h5['z'][str(timepoint)],name='z')],axis=1)
+
     def collect_positions(self,h5):
         """get cell locations for all timesteps and aggregate into a dataframe
         """
         dfs = list()
         for t in self.timepoints:
-            dfs.append(self.get_positions(h5,t))
+            dfs.append(
+                pd.concat([pd.Series(np.ones(h5['x'][str(t)].len())*int(t),dtype=int,name='Timestep'),
+                pd.Series(h5['id'][str(t)],name='ID'),
+                pd.Series(h5['type'][str(t)],name='type'),
+                pd.Series(h5['radius'][str(t)],name='radius'),
+                pd.Series(h5['x'][str(t)],name='x'),
+                pd.Series(h5['y'][str(t)],name='y'),
+                pd.Series(h5['z'][str(t)],name='z')],axis=1)
+                )
+        temp = pd.concat(dfs,ignore_index=True)
+        idx = temp[temp.type==0].index
+        self.positions = temp.drop(idx).reset_index(drop=True)
+    def collect_positions2(self,h5):
+        """get cell locations for all timesteps and aggregate into a dataframe
+        """
+        dfs = list()
+        for t in self.timepoints:
+            dfs.append(self.get_positions(h5))
         temp = pd.concat(dfs,ignore_index=True)
         idx = temp[temp.type==0].index
         self.positions = temp.drop(idx).reset_index(drop=True)
@@ -482,7 +501,7 @@ class get_data:
         fitness = pd.DataFrame(columns=['Time','ID','Fitness'])
         for time in tqdm(self.Timesteps):
             for cell in df[(df.Timestep==time)].ID:
-                fitness = fitness.append(pd.DataFrame([time,cell,self.get_fitness2(time,cell)],columns=['Time','ID','Fitness']),ignore_index=True)
+                fitness = fitness.append(pd.DataFrame([[time,cell,self.get_fitness2(time,cell)]],columns=['Time','ID','Fitness']),ignore_index=True)
         self.fitness=fitness
 
 def get_grid_idx(array,value):
