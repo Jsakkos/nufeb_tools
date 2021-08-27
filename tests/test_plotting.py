@@ -6,16 +6,14 @@ def avg_nute_plot():
     plot.average_nutrients(x.avg_con,'suc',ax=ax,color='Green',legend=True)
 def single_cell_plot():
     f, ax = plt.subplots()
-    x.single_cell_growth()
-    plot.biomass_time(x.single_cell_biomass)
+    plot.biomass_time(x.positions)
 def overall_growth_plot():
     f, ax = plt.subplots()
     plot.overall_growth(x.biomass,ax=ax)
 def growth_rate_plots():
-    x.single_cell_growth()
-    plot.growth_rate_div(x.single_cell_biomass)
-    plot.growth_rate_time(x.single_cell_biomass)
-    plot.growth_rate_mu(x.single_cell_biomass)
+    plot.growth_rate_div(x.positions)
+    plot.growth_rate_time(x.positions)
+    plot.growth_rate_mu(x.positions)
 def plot_colonies():
     f, ax = plt.subplots()
-    plot.plot_colony(x,time=100)
+    plot.colony(x,time=100)

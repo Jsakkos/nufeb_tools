@@ -46,8 +46,7 @@ Single Cell Growth
     sns.set_context('talk')
     sns.set_style('white')
     x = utils.get_data(directory = None,test=True)
-    x.single_cell_growth()
-    plot.biomass_time(x.single_cell_biomass)
+    plot.biomass_time(x.positions)
     f.tight_layout()
 
 Single Cell Growth Rate
@@ -64,8 +63,7 @@ Single Cell Growth Rate
     from nufeb_tools import utils, plot
     import matplotlib.pyplot as plt
     x = utils.get_data(directory = None,test=True)
-    x.single_cell_growth()
-    plot.growth_rate_div(x.single_cell_biomass)
+    plot.growth_rate_div(x.positions)
 
 .. image:: _static/images/growth_rate_time.png
    :align: center
@@ -75,8 +73,7 @@ Single Cell Growth Rate
     from nufeb_tools import utils, plot
     import matplotlib.pyplot as plt
     x = utils.get_data(directory = None,test=True)
-    x.single_cell_growth()
-    plot.growth_rate_time(x.single_cell_biomass)
+    plot.growth_rate_time(x.positions)
 
 Overall Cell Growth
 ^^^^^^^^^^^^^^^^^^^
