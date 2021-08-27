@@ -27,7 +27,7 @@ __license__ = "MIT"
 
 _logger = logging.getLogger(__name__)
 
-
+# TODO update lmp and atom templates
 CellInfo = {'cyano': {'GrowthRate' : round(0.06/3600,7),
     'min_length' : 1e-6, 'max_length' : 5e-6, 'Diameter' : 1e-6, 'Density' : 370,
     'Inertia' : {'ixx' : 0, 'iyy' : 0, 'izz' : 9.2e-23, 'ixy' : 0, 'ixz' : 0, 'iyz' : 0},
