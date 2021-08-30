@@ -65,7 +65,7 @@ def parse_args(args):
     parser.add_argument('--cells',dest='cells',action='store',default=None,
     help='Number of cyanobacteria and e.coli to initialize simulation with, `e.g., 100,100. ` Default is random number between 1 and 100.')
     parser.add_argument('--sucR',dest='SucRatio',action='store',default=None,
-                    help='Set sucrose secretion ratio (0 to 10). Default is random.')   
+                    help='Set sucrose secretion ratio (0 to 1). Default is random.')   
     parser.add_argument('--muecw',dest='mu_ecw',action='store',default=6.71e-5,type=float,
                     help='E. coli W maximum growth rate')  
     parser.add_argument('--mucya',dest='mu_cya',action='store',default=1.67e-5,type=float,
