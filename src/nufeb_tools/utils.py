@@ -83,9 +83,10 @@ class get_data:
 
         self.biomass = pd.read_csv(os.path.join(
             self.directory,'Results','biomass.csv'),
-                                   usecols=[0,1,2],delimiter='\t')
+            usecols=[0,1,2],delimiter='\t')
         self.ntypes = pd.read_csv(os.path.join(
-            self.directory,'Results','ntypes.csv'))
+            self.directory,'Results','ntypes.csv'),
+            usecols=[0,1,2],delimiter='\t')
         self.avg_con = pd.read_csv(os.path.join(
             self.directory,'Results','avg_concentration.csv'),
             usecols=[0,2,3,4],
