@@ -325,7 +325,7 @@ class get_data:
         grid = np.stack(stacks,axis=1)
         self.grid = grid
         return
-    def get_local_con2(self,timestep,cellID):
+    def get_local_con(self,timestep,cellID):
         """
         Get the local nutrient concentration of a cell
 
@@ -346,7 +346,7 @@ class get_data:
 
         return self.grid[timestep,:,grid_loc[2],grid_loc[0],grid_loc[1]]
 
-    def get_fitness2(self,timestep,cellID):
+    def get_fitness(self,timestep,cellID):
         """
         Get the fitness of an individual cell based on the relative Monod growth rate at a given timestep
 
@@ -365,7 +365,7 @@ class get_data:
         if df[(df.Timestep ==timestep) & (df.ID ==cellID)].empty:
             print('Timestep or cell ID not found')
             return
-        concentrations = self.get_local_con2(list(df.Timestep.unique()).index(timestep),cellID)
+        concentrations = self.get_local_con(list(df.Timestep.unique()).index(timestep),cellID)
         if cell_type == 1:
             metadata = self.metadata['cyano']
             light = concentrations[self.nutrients.index('sub')]
@@ -385,7 +385,7 @@ class get_data:
         fitness = pd.DataFrame(columns=['Time','ID','Fitness'])
         for time in tqdm(self.Timesteps):
             for cell in df[(df.Timestep==time)].ID:
-                fitness = fitness.append(pd.DataFrame([[time,cell,self.get_fitness2(time,cell)]],columns=['Time','ID','Fitness']),ignore_index=True)
+                fitness = fitness.append(pd.DataFrame([[time,cell,self.get_fitness(time,cell)]],columns=['Time','ID','Fitness']),ignore_index=True)
         self.fitness=fitness
 
 def get_grid_idx(array,value):
@@ -417,7 +417,8 @@ def get_grid_idx(array,value):
     elif (value == array[n-1]):# and top
         return n-1
     else:
-        return jl             
+        return jl  
+                   
 def download_test_data(urls=urls):
     """
     Get an example dataset from the Github repo. Downloads to "home/.nufeb_tools/data"
