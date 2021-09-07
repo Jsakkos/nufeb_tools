@@ -249,7 +249,7 @@ class get_data:
         pairwise[pairwise ==0] = np.nan
         return pairwise
 
-    def get_mothers(self):
+    def get_mothers__old(self):
         """
         Assign mother cells based on initial cells in the simulation.
 
@@ -276,7 +276,15 @@ class get_data:
                     a = ancestors.iloc[i,:].mother_cell.values
                     df.loc[idx1,'mother_cell']=a
         self.colonies = df
-    def get_mothers2(self):
+    def get_mothers(self):
+        """
+        Assign mother cells based on initial cells in the simulation.
+
+        Returns:
+            pandas.DataFrame:
+                Dataframe containing Timestep, ID, type, position, radius, biomass, total biomass, and mother_cell
+
+        """
         df = self.positions
         df['mother_cell'] = -1
         ancestry = dict()
@@ -288,11 +296,11 @@ class get_data:
         for time in tqdm(sorted(df[df.Timestep!=0].Timestep.unique()),desc='Assigning ancestry'):
             for type_ in df.type.unique():
                 ancestors = df[(df.type==type_) & (df.Timestep==500) & (df.mother_cell.isin(ancestry.values()))]
-                arr1 = ancestors[['x','y']].to_numpy()
+                arr1 = ancestors[['x','y','z']].to_numpy()
                 tree1 = KDTree(arr1)
                 motherless = df[(df.type==type_) & (df.Timestep==time) & (df.mother_cell == -1)]
                 if not motherless.empty:
-                    d, i = tree1.query(motherless[['x','y']].to_numpy(), k=1)
+                    d, i = tree1.query(motherless[['x','y','z']].to_numpy(), k=1)
                     idx1 =motherless.index
                     a = ancestors.iloc[i,:].mother_cell.values
                     for id_,mother in zip(motherless.ID,a):
