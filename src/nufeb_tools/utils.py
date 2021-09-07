@@ -311,6 +311,7 @@ class get_data:
         temp.columns=['ID','mother_cell']
         df = pd.merge(df,temp,on='ID')
         df['total_biomass'] = df.groupby(['mother_cell','Timestep']).cumsum()['biomass']
+        self.colonies = df
 
     def count_colony_area(self,timestep):
         """
