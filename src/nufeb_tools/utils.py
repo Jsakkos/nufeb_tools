@@ -276,6 +276,33 @@ class get_data:
                     a = ancestors.iloc[i,:].mother_cell.values
                     df.loc[idx1,'mother_cell']=a
         self.colonies = df
+    def get_mothers2(self):
+        df = self.positions
+        df['mother_cell'] = -1
+        ancestry = dict()
+        for ID in df[df.Timestep==0].ID.unique():
+            idx = df[df['ID'] ==ID].index
+            df.loc[idx,'mother_cell'] = ID
+            ancestry.update({ID:ID})
+
+        for time in tqdm(sorted(df[df.Timestep!=0].Timestep.unique()),desc='Assigning ancestry'):
+            for type_ in df.type.unique():
+                ancestors = df[(df.type==type_) & (df.Timestep==500) & (df.mother_cell.isin(ancestry.values()))]
+                arr1 = ancestors[['x','y']].to_numpy()
+                tree1 = KDTree(arr1)
+                motherless = df[(df.type==type_) & (df.Timestep==time) & (df.mother_cell == -1)]
+                if not motherless.empty:
+                    d, i = tree1.query(motherless[['x','y']].to_numpy(), k=1)
+                    idx1 =motherless.index
+                    a = ancestors.iloc[i,:].mother_cell.values
+                    for id_,mother in zip(motherless.ID,a):
+                        ancestry.update({id_:mother})
+                        #df.loc[df.ID==id_,'mother_cell']=mother
+        df.drop('mother_cell',inplace=True,axis=1)
+        temp = pd.DataFrame.from_dict(ancestry,orient='index').reset_index()
+        temp.columns=['ID','mother_cell']
+        df = pd.merge(df,temp,on='ID')
+        df['total_biomass'] = df.groupby(['mother_cell','Timestep']).cumsum()['biomass']
 
     def count_colony_area(self,timestep):
         """
