@@ -6,7 +6,7 @@ import pandas as pd
 from nufeb_tools import __version__
 
 def fitness_metrics(obj):
-    obj.count_colony_area(35000)
+    obj.count_colony_area(obj.Timesteps[-1])
     df = obj.colonies.copy()
     # calculate voronoi area
     dfs = list()
@@ -15,10 +15,10 @@ def fitness_metrics(obj):
         points = df[(df.Timestep ==0) & (df.type == type_)][['x','y']].values
         vor = Voronoi(points)
         areas = [abs(np.sum( [0.5, -0.5] * vor.vertices[vor.regions[i]] * np.roll( np.roll(vor.vertices[vor.regions[i]], 1, axis=0), 1, axis=1) )) for i in range(len(vor.regions))]
-        IDs['Voronoi Area'] = areas[1:]
+        IDs.loc[:,'Voronoi Area'] = areas[1:]
         dfs.append(IDs)
     metrics = pd.concat(dfs)
-
+    metrics.loc[:,'sucRatio'] = obj.sucRatio
     # total biomass per colony
     biomasses = df[df.Timestep==obj.Timesteps[-1]].groupby('mother_cell').sum().reset_index()[['mother_cell','biomass']]
     biomasses.columns=['mother_cell','total biomass']
