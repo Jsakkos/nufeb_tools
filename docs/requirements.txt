@@ -17,4 +17,4 @@ seaborn
 tqdm
 scipy
 pytest
-skgeom
+scikit-geometry
