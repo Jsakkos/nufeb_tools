@@ -70,7 +70,9 @@ def parse_args(args):
                     help='E. coli W maximum growth rate')  
     parser.add_argument('--mucya',dest='mu_cya',action='store',default=1.67e-5,type=float,
                     help='E. coli W maximum growth rate')   
-
+    parser.add_argument('--vtk',dest='vtk',action='store',default=False,help='Output VTK files')
+    parser.add_argument('--h5',dest='hdf5',action='store',default=True,help='Output HDF5 files')
+    parser.add_argument('--lammps',dest='lammps',action='store',default=False,help='Output lammps files')
     parser.add_argument(
     "-v",
     "--verbose",
@@ -273,6 +275,21 @@ def main(args):
         #write Inputscript
         #open the file
 
+
+        if args.lammps ==True:
+            lammps = 'dump    id all custom 100 output.lammmps id type diameter x y z'
+        else: 
+            lammps = ''
+        if args.hdf5 == True:
+            hdf5 = 'dump    traj all bio/hdf5 100 trajectory.h5 id type radius x y z con'
+        else:
+            hdf5 = ''
+        if args.vtk == True:
+            vtk = 'dump    du1 all vtk 100 atom_*.vtu id type diameter x y z'
+            grid = 'dump    du2 all grid 100 grid_%_*.vti con'
+        else:
+            vtk = ''
+            grid = ''
         filein = open( TEMPLATES_DIR / 'inputscript.txt' )
         #read it
         src = Template( filein.read() )
@@ -285,7 +302,12 @@ def main(args):
                                     'ECWGroup' : ecwGroup,
                                     'Zheight' : InitialConditions["Dimensions"][2],
                                     'CYANODiv'  : cyDiv, 'ECWDiv' : ecwDiv,
-                                    'GridMesh' : f'{int(InitialConditions["Dimensions"][0]*1e6/int(args.grid))} {int(InitialConditions["Dimensions"][1]*1e6/int(args.grid))} {int(InitialConditions["Dimensions"][2]*1e6/int(args.grid))}'})
+                                    'GridMesh' : f'{int(InitialConditions["Dimensions"][0]*1e6/int(args.grid))} {int(InitialConditions["Dimensions"][1]*1e6/int(args.grid))} {int(InitialConditions["Dimensions"][2]*1e6/int(args.grid))}',
+                                    'lammps' : lammps
+                                    'hdf5' : hdf5,
+                                    'vtk' : vtk,
+                                    'grid' : grid
+                                    })
         f= open(RUN_DIR / f"Inputscript_{n_cyanos}_{n_ecw}_{SucPct}_{today}.lammps","w+")
         f.writelines(result)
 
