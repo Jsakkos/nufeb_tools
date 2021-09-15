@@ -7,6 +7,9 @@ from nufeb_tools import __version__
 
 def fitness_metrics(obj):
     obj.count_colony_area(obj.Timesteps[-1])
+    D_suc = obj.metadata['Diff_c']['suc']
+    mu_ecw = obj.metadata['ecw']['GrowthRate']
+    mu_cy = obj.metadata['cyano']['GrowthRate']
     df = obj.colonies.copy()
     # calculate voronoi area
     dfs = list()
@@ -25,6 +28,9 @@ def fitness_metrics(obj):
 
     # Calculate nearest neighbors
     df3 = df[df.Timestep == 0]
+    arr = df3[['x','y','z']].to_numpy()
+    tree = KDTree(arr)
+    d, i = tree.query(arr, k=2)
     arr1 = df3[df3.type==1][['x','y','z']].to_numpy()
     tree1 = KDTree(arr1)
     d1, i1 = tree1.query(df3[['x','y','z']].to_numpy(), k=2)
@@ -43,10 +49,23 @@ def fitness_metrics(obj):
             n2.append(d2[i,1])
         else:
             n2.append(d2[i,0])
-    df3.loc[:,'Nearest1']=n1
-    df3.loc[:,'Nearest2']=n2
-    df3 = df3[['mother_cell','Nearest1','Nearest2']]
-    # calculate sum of inverse neighbor distance
+    df3.loc[:,'Nearest 1']=n1
+    df3.loc[:,'Nearest 2']=n2
+    df3.loc[:,'Nearest Neighbor'] = d[:,1]
+    df3 = df3[['mother_cell','Nearest 1','Nearest 2','Nearest Neighbor']]
+    df3.loc[:,'IC1'] = df3.loc[:,'Nearest 1'].mean()
+    df3.loc[:,'IC2'] = df3.loc[:,'Nearest 2'].mean()
+    df3.loc[:,'IC'] = df3.loc[:,'Nearest Neighbor'].mean()
+    df3.loc[:,'Relative Neighbor Dist 1'] = df3.loc[:,'Nearest 1']/df3.loc[:,'IC1']
+    df3.loc[:,'Relative Neighbor Dist 2'] = df3.loc[:,'Nearest 2']/df3.loc[:,'IC2']
+    df3.loc[:,'Relative Neighbor Dist'] = df3.loc[:,'Nearest Neighbor']/df3.loc[:,'IC']
+    df3.loc[:,'Z1'] = df3.loc[:,'Relative Neighbor Dist 1']/np.sqrt(D_suc/mu_ecw)
+    df3.loc[:,'Z2'] = df3.loc[:,'Relative Neighbor Dist 2']/np.sqrt(D_suc/mu_cy)
+    df3.loc[:,'Z1_2'] = df3.loc[:,'Relative Neighbor Dist 1']/np.sqrt(D_suc/mu_cy)
+    df3.loc[:,'Z2_1'] = df3.loc[:,'Relative Neighbor Dist 2']/np.sqrt(D_suc/mu_ecw)
+    df3.loc[:,'LogNearest 1'] = np.log(df3['Nearest 1'])
+    df3.loc[:,'LogNearest 2'] = np.log(df3['Nearest 2'])
+    df3.loc[:,'LogNearest'] = np.log(df3.loc[:,'Nearest Neighbor'])
     inv1 = list()
     for i in df[df.Timestep == 0][['x','y','z']].to_numpy():
         d1, i1 = tree1.query(i,k=2)
