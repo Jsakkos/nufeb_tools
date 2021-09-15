@@ -287,9 +287,11 @@ def main(args):
         if args.vtk == True:
             vtk = 'dump    du1 all vtk 100 atom_*.vtu id type diameter x y z'
             grid = 'dump    du2 all grid 100 grid_%_*.vti con'
+            vtk_tarball = 'true'
         else:
             vtk = ''
             grid = ''
+            vtk_tarball = 'false'
         filein = open( TEMPLATES_DIR / 'inputscript.txt' )
         #read it
         src = Template( filein.read() )
@@ -303,7 +305,7 @@ def main(args):
                                     'Zheight' : InitialConditions["Dimensions"][2],
                                     'CYANODiv'  : cyDiv, 'ECWDiv' : ecwDiv,
                                     'GridMesh' : f'{int(InitialConditions["Dimensions"][0]*1e6/int(args.grid))} {int(InitialConditions["Dimensions"][1]*1e6/int(args.grid))} {int(InitialConditions["Dimensions"][2]*1e6/int(args.grid))}',
-                                    'lammps' : lammps
+                                    'lammps' : lammps,
                                     'hdf5' : hdf5,
                                     'vtk' : vtk,
                                     'grid' : grid
@@ -337,7 +339,8 @@ def main(args):
         src = Template( filein.read() )
         #do the substitution
         result = src.safe_substitute({'job' : f"NUFEB_{n}",
-                                        'USER' : args.user})
+                                        'USER' : args.user,
+                                        'VTK' : vtk_tarball})
         f= open(f"NUFEB_{today}.slurm","w+")
         f.writelines(result)
         #write local run script
