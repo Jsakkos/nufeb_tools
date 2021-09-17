@@ -296,7 +296,7 @@ class get_data:
 
         for time in tqdm(sorted(df[df.Timestep!=0].Timestep.unique()),desc='Assigning ancestry'):
             for type_ in df.type.unique():
-                ancestors = df[(df.type==type_) & (df.Timestep==500) & (df.mother_cell.isin(ancestry.values()))]
+                ancestors = df[(df.type==type_) & (df.Timestep==time) & (df.mother_cell.isin(ancestry.values()))]
                 arr1 = ancestors[['x','y','z']].to_numpy()
                 tree1 = KDTree(arr1)
                 motherless = df[(df.type==type_) & (df.Timestep==time) & (df.mother_cell == -1)]
