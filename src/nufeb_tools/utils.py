@@ -111,7 +111,7 @@ class get_data:
         CO2MW = 44.01
         self.avg_con.O2 = self.avg_con.O2/O2MW*1e3
         self.avg_con.Sucrose = self.avg_con.Sucrose/SucroseMW*1e3
-        self.avg_con['CO2'] = self.avg_con['CO2']/CO2MW*1e3
+        self.avg_con.loc[:,'CO2'] = self.avg_con.loc[:,'CO2']/CO2MW*1e3
 
     def convert_units_biomass(self):
         """Convert the object attribute biomass units to hours and femtograms.
@@ -171,7 +171,7 @@ class get_data:
         self.convert_units_biomass()
     #print(dv_resp)
  
-        # TODO speed up calculate of biomass
+
     def calc_biomass(self):
         df = self.positions
         df['biomass'] = 0
@@ -222,9 +222,9 @@ class get_data:
         """
         # TODO Speed up or parallelize this computation
         df = self.positions[self.positions.Timestep==timepoint]
-        temp = (df[df.ID ==id][['x','y','z']].squeeze() - df[df.ID !=id][['x','y','z']])**2
+        temp = (df.loc[df.ID ==id,['x','y','z']].squeeze() - df.loc[df.ID !=id,['x','y','z']])**2
         dist = pd.Series(np.sqrt(temp.x + temp.y + temp.z),name='Distance')
-        return pd.concat([df[df.ID !=id][['ID','type']],dist],axis=1).reset_index(drop=True)
+        return pd.concat([df.loc[df.ID !=id,['ID','type']],dist],axis=1).reset_index(drop=True)
 
     def get_neighbors(self,timestep):
         """
@@ -261,7 +261,7 @@ class get_data:
         """
         df = self.positions
         df['mother_cell'] = -1
-        for ID in df[df.Timestep==0].ID.unique():
+        for ID in df.loc[df.Timestep==0,'ID'].unique():
             idx = df[df['ID'] ==ID].index
             df.loc[idx,'mother_cell'] = ID
 
