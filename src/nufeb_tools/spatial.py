@@ -115,8 +115,7 @@ def fitness_metrics(obj):
 
     colony_area = df[df.Timestep==obj.Timesteps[-1]][['mother_cell','Colony Area']].drop_duplicates()
 
-    #df[df.Timestep==0]
-    metrics = metrics.merge(biomasses,on='mother_cell')#.groupby('mother_cell').max().reset_index()
+    metrics = metrics.merge(biomasses,on='mother_cell')
     metrics = metrics.merge(df3,on='mother_cell')
     metrics = metrics.merge(colony_area,on='mother_cell')
     metrics
