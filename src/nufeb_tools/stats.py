@@ -1,11 +1,22 @@
 
 from scipy.spatial import KDTree
-from scipy.spatial import Voronoi, voronoi_plot_2d
+from scipy.spatial import Voronoi
 import numpy as np
 import pandas as pd
 from nufeb_tools import __version__
 
 def fitness_metrics(obj):
+    """
+    Function to calculate colony-level fitness metrics 
+
+    Args:
+        obj (nufeb_tools.utils.get_data): 
+            Data object collected with nufeb_tools.utils.get_data
+
+    Returns:
+        pandas.DataFrame: 
+            Dataframe containing colony number (mother cell ID), cell type, total biomass, colony area, Voronoi area, nearest neighbor, mean neighbor distance, etc.
+    """
     obj.count_colony_area(obj.Timesteps[-1])
     D_suc = obj.metadata['Diff_c']['suc']
     mu_ecw = obj.metadata['ecw']['GrowthRate']
