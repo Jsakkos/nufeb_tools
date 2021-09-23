@@ -4,7 +4,7 @@ from scipy.spatial import Voronoi
 import numpy as np
 import pandas as pd
 from nufeb_tools import __version__
-
+# TODO modify to account for edge effects
 def fitness_metrics(obj):
     """
     Function to calculate colony-level fitness metrics 
