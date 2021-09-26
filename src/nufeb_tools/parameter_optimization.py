@@ -90,7 +90,7 @@ def optimize():
         beta = 4
         delta=0.03
         mu = 1.67e-5 """
-"""     space = scope.main(hp.uniform('alpha', .01, .5),hp.uniform('beta', 1, 5),hp.uniform('delta', .01, .1),hp.uniform('mu', 1e-5, 1e-6),hp.uniform('rho',320,390))
+"""     space = scope.main(hp.uniform('alpha', .01, .5),hp.uniform('beta', 1, 5),hp.uniform('delta', .01, .1),hp.uniform('mu', 1e-6, 1e-5),hp.uniform('rho',320,390))
     best = fmin(main,
     space=space,
     algo=tpe.suggest,
