@@ -34,6 +34,8 @@ def main(rho,alpha,beta,delta,mu):
     #Compile NUFEB
     os.chdir(str(HOME / 'NUFEB'))
     os.system("./install.sh --enable-hdf5 --enable-vtk")
+    #Clean old simulations
+    os.system('nufeb-clean')
     #Run simulation
     text = f'nufeb-seed --cells 100,0 --d 1e-4,1e-4,1e-4 --grid 20 --t 10000 --mucya {mu} --sucR 0 --rhocya {rho}'
     os.system(text)
