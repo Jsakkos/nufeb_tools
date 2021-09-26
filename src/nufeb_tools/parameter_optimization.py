@@ -9,6 +9,10 @@ from string import Template
 import numpy as np
 from hyperopt import fmin, tpe, hp,space_eval
 from hyperopt.pyll import scope
+from numpy.ma import MaskedArray
+import sklearn.utils.fixes
+
+sklearn.utils.fixes.MaskedArray = MaskedArray
 import pickle
 def main(x):
 
