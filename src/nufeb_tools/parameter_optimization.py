@@ -9,8 +9,14 @@ from string import Template
 import numpy as np
 from hyperopt import fmin, tpe, hp,space_eval
 from hyperopt.pyll import scope
+import pickle
+def main(x):
 
-def main(rho,alpha,beta,delta,mu):
+    alpha = x[0]
+    beta = x[1]
+    delta = x[2]
+    mu = x[3]
+    rho = x[4]
     exp_low = [1.38,.041872]
     exp_high = [1.146667,1.141355]
     TEMPLATES_DIR = (Path(__file__).parent) / 'templates'
@@ -63,19 +69,30 @@ def main(rho,alpha,beta,delta,mu):
     return np.sqrt((low_suc - exp_low)**2).sum() + np.sqrt((high_suc - exp_high)**2).sum()
     #Optimize
 def optimize():
+    from skopt import gp_minimize
+
+    res = gp_minimize(main,                  # the function to minimize
+                    [(0.1, .5),(1,5),(0.1,.1),(1e-5,1e-6),(320,390)],      # the bounds on each dimension of x
+                    acq_func="EI",      # the acquisition function
+                    n_calls=15,         # the number of evaluations of f
+                    n_random_starts=5,  # the number of random initialization points
+                    random_state=1234)
+    print(res)
+    file_pi = open('results.obj', 'w') 
+    pickle.dump(res, file_pi)
     """         rho = 370
         alpha =.2
         beta = 4
         delta=0.03
         mu = 1.67e-5 """
-    space = scope.main(hp.uniform('alpha', .01, .5),hp.uniform('beta', 1, 5),hp.uniform('delta', .01, .1),hp.uniform('mu', 1e-5, 1e-6),hp.uniform('rho',320,390))
+"""     space = scope.main(hp.uniform('alpha', .01, .5),hp.uniform('beta', 1, 5),hp.uniform('delta', .01, .1),hp.uniform('mu', 1e-5, 1e-6),hp.uniform('rho',320,390))
     best = fmin(main,
     space=space,
     algo=tpe.suggest,
     max_evals=100)
 
     print(best)
-    print(space_eval(space, best))
+    print(space_eval(space, best)) """
     
 if __name__ == "__main__":
 
