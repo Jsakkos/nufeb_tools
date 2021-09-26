@@ -1,19 +1,21 @@
 #Imports
 import os
+from random import uniform
 import subprocess
 from pathlib import Path
 from nufeb_tools import utils,plot
 import pandas as pd
 from string import Template
+import numpy as np
+from hyperopt import fmin, tpe, hp,space_eval
 
-def main():
+
+def main(rho,alpha,beta,delta,mu):
+    exp_low = [1.38,.041872]
+    exp_high = [1.146667,1.141355]
     TEMPLATES_DIR = (Path(__file__).parent) / 'templates'
     #Define inputs
 
-    D = 370
-    alpha =.2
-    beta = 4
-    delta=0.03
 
     #Change input params
     HOME = Path.home()
@@ -26,16 +28,18 @@ def main():
     result = src.safe_substitute({'alpha' : alpha, 'beta' : beta, 'delta' : delta,
                                         
                                         })
-    f= open(NUFEB_DIR / "fix_bio_kinetics_monod.cpp","w+")
+    os.chdir(HOME)
+    f= open("NUFEB/src/USER-NUFEB/fix_bio_kinetics_monod.cpp","w+")
     f.writelines(result)
     #Compile NUFEB
-    os.system("cd ",str(HOME / 'NUFEB'))
+    os.chdir(str(HOME / 'NUFEB'))
     os.system("./install.sh --enable-hdf5 --enable-vtk")
     #Run simulation
-
-    seed = subprocess.run(["nufeb-seed", "--cells", "100,0", "--d", "1e-4,1e-4,1e-4", "--grid", "20", "--t", "10000"])
-    print("The exit code was: %d" % seed.returncode)
-
+    text = f'nufeb-seed --cells 100,0 --d 1e-4,1e-4,1e-4 --grid 20 --t 10000 --mucya {mu} --sucR 0 --rhocya {rho}'
+    os.system(text)
+    text = f'nufeb-seed --cells 100,0 --d 1e-4,1e-4,1e-4 --grid 20 --t 10000 --mucya {mu} --sucR 1 --rhocya {rho}'
+    os.system(text)
+    os.system('./run.sh')
     #Extract output
     BASE_DIR = Path(f'runs/')
     folders = [path for path in BASE_DIR.iterdir() if path.is_dir()]
@@ -50,11 +54,27 @@ def main():
         temp['SucroseExport'] = x.sucRatio/100
         dfs.append(temp)
     df = pd.concat(dfs)
-    if not df.empty():
-        print('success')
-    #Compare output with experimental data
+    low_suc = df.loc[(df.Hours > 23.8) & (df.Hours < 24) & (df.SucroseExport==0)].mean()[['OD750','Sucrose']].to_numpy()
+    high_suc = df.loc[(df.Hours > 23.8) & (df.Hours < 24) & (df.SucroseExport==1)].mean()[['OD750','Sucrose']].to_numpy()
 
+    #Compare output with experimental data
+    return np.sqrt((low_suc - exp_low)**2).sum() + np.sqrt((high_suc - exp_high)**2).sum()
     #Optimize
+def optimize():
+    """         rho = 370
+        alpha =.2
+        beta = 4
+        delta=0.03
+        mu = 1.67e-5 """
+    space = [hp.uniform('alpha', .01, .5),hp.uniform('beta', 1, 5),hp.uniform('delta', .01, .1),hp.uniform('mu', 1e-5, 1e-6),hp.uniform('rho',320,390)]
+    best = fmin(main,
+    space=space,
+    algo=tpe.suggest,
+    max_evals=100)
+
+    print(best)
+    print(space_eval(space, best))
+    
 if __name__ == "__main__":
 
-    main()
+    optimize()

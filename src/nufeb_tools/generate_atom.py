@@ -69,7 +69,9 @@ def parse_args(args):
     parser.add_argument('--muecw',dest='mu_ecw',action='store',default=6.71e-5,type=float,
                     help='E. coli W maximum growth rate')  
     parser.add_argument('--mucya',dest='mu_cya',action='store',default=1.67e-5,type=float,
-                    help='E. coli W maximum growth rate')   
+                    help='S. elongatus maximum growth rate')   
+    parser.add_argument('--rhocya',dest='rho_cya',action='store',default=370,type=float,
+        help='S. elongatus cell density')  
     parser.add_argument('--vtk',dest='vtk',action='store',default=False,help='Output VTK files')
     parser.add_argument('--h5',dest='hdf5',action='store',default=True,help='Output HDF5 files')
     parser.add_argument('--lammps',dest='lammps',action='store',default=False,help='Output lammps files')
@@ -186,7 +188,7 @@ def main(args):
             os.mkdir(RUN_DIR)
         # TODO embed cell type into metadata file and generate cell type programmatically
         InitialConditions = {'cyano': {'StartingCells' : n_cyanos,'GrowthRate' : args.mu_cya,
-            'min_size' : 1.37e-6, 'max_size' : 1.94e-6, 'Density' : 370,
+            'min_size' : 1.37e-6, 'max_size' : 1.94e-6, 'Density' : args.rho_cya,
                 'K_s' : {'sub' : 3.5e-4,'o2' : 2e-4, 'suc' : 1e-2,'co2' : 1.38e-4},
                 'GrowthParams' : {'Yield' : 0.55,'Maintenance' : 0,'Decay' : 0}},
                 'ecw': {'StartingCells' : n_ecw,'GrowthRate' : args.mu_ecw,
