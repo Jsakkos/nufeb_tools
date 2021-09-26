@@ -16,7 +16,8 @@ def main():
     delta=0.03
 
     #Change input params
-    NUFEB_DIR = Path('~/NUFEB/src/USER-NUFEB/')
+    HOME = Path.home()
+    NUFEB_DIR = HOME / '/NUFEB/src/USER-NUFEB/'
 
     filein = open( TEMPLATES_DIR / 'fix_bio_kinetics_monod.txt' )
             #read it
@@ -25,10 +26,10 @@ def main():
     result = src.safe_substitute({'alpha' : alpha, 'beta' : beta, 'delta' : delta,
                                         
                                         })
-    f= open(NUFEB_DIR / f"fix_bio_kinetics_monod.cpp","w+")
+    f= open(NUFEB_DIR / "fix_bio_kinetics_monod.cpp","w+")
     f.writelines(result)
     #Compile NUFEB
-    os.system("cd ~/NUFEB/")
+    os.system("cd ",str(HOME / 'NUFEB'))
     os.system("./install.sh --enable-hdf5 --enable-vtk")
     #Run simulation
 
