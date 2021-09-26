@@ -13,6 +13,7 @@ from numpy.ma import MaskedArray
 import sklearn.utils.fixes
 
 sklearn.utils.fixes.MaskedArray = MaskedArray
+from skopt import gp_minimize
 import pickle
 def main(x):
 
@@ -73,10 +74,10 @@ def main(x):
     return np.sqrt((low_suc - exp_low)**2).sum() + np.sqrt((high_suc - exp_high)**2).sum()
     #Optimize
 def optimize():
-    from skopt import gp_minimize
+    
 
     res = gp_minimize(main,                  # the function to minimize
-                    [(0.1, .5),(1,5),(0.1,.1),(1e-5,1e-6),(320,390)],      # the bounds on each dimension of x
+                    [(0.1, .5),(1,5),(0.01,.1),(1e-5,1e-6),(320,390)],      # the bounds on each dimension of x
                     acq_func="EI",      # the acquisition function
                     n_calls=15,         # the number of evaluations of f
                     n_random_starts=5,  # the number of random initialization points
