@@ -70,8 +70,15 @@ def parse_args(args):
                     help='E. coli W maximum growth rate')  
     parser.add_argument('--mucya',dest='mu_cya',action='store',default=1.67e-5,type=float,
                     help='S. elongatus maximum growth rate')   
+    parser.add_argument('--rhoecw',dest='rho_ecw',action='store',default=230,type=float,
+        help='E. coli W cell density')  
     parser.add_argument('--rhocya',dest='rho_cya',action='store',default=370,type=float,
         help='S. elongatus cell density')  
+    parser.add_argument('--ksuc',dest='ksuc',action='store',default=3.6,type=float,
+        help='E. coli W Ksuc')  
+    parser.add_argument('--maintecw',dest='maint_ecw',action='store',default=9.50e-7,type=float,
+        help='E. coli W maintenance cost')  
+
     parser.add_argument('--vtk',dest='vtk',action='store',default=False,help='Output VTK files')
     parser.add_argument('--h5',dest='hdf5',action='store',default=True,help='Output HDF5 files')
     parser.add_argument('--lammps',dest='lammps',action='store',default=False,help='Output lammps files')
@@ -192,9 +199,9 @@ def main(args):
                 'K_s' : {'sub' : 3.5e-4,'o2' : 2e-4, 'suc' : 1e-2,'co2' : 1.38e-4},
                 'GrowthParams' : {'Yield' : 0.55,'Maintenance' : 0,'Decay' : 0}},
                 'ecw': {'StartingCells' : n_ecw,'GrowthRate' : args.mu_ecw,
-            'min_size' : 8.8e-7, 'max_size' : 1.39e-6, 'Density' : 230,
-                'K_s' : {'sub' : 0,'o2' : 1e-3, 'suc' : 3.6,'co2' : 5e-2},
-                'GrowthParams' : {'Yield' : 0.43,'Maintenance' : 9.50e-7,'Decay' : 0}},
+            'min_size' : 8.8e-7, 'max_size' : 1.39e-6, 'Density' : args.rho_ecw,
+                'K_s' : {'sub' : 0,'o2' : 1e-3, 'suc' : args.ksuc,'co2' : 5e-2},
+                'GrowthParams' : {'Yield' : 0.43,'Maintenance' : args.maint_ecw,'Decay' : 0}},
                 'Nutrients' : {'Concentration' :  {'sub' : 1e-1,'o2' : 9e-3, 'suc' : float(args.sucrose)*SucMW*1e-3, 'co2' : float(args.co2)*CO2MW*1e-3},
                 'State' : {'sub' : 'g','o2' : 'l', 'suc' : 'l', 'co2' : 'l'},
                 'xbc' : {'sub' : 'nn','o2' : 'nn', 'suc' : 'nn', 'co2' : 'nn'},
