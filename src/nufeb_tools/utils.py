@@ -64,7 +64,7 @@ class get_data:
         self.numsteps = len(self.timepoints)
         self.Timesteps = self.positions.Timestep.unique()
         self.calc_biomass()
-        #self.get_mothers()
+        self.get_mothers()
         
     def get_local_data(self):
         """
@@ -286,31 +286,25 @@ class get_data:
                 Dataframe containing Timestep, ID, type, position, radius, biomass, total biomass, and mother_cell
 
         """
-        df = self.positions
+        df = self.positions.copy()
         df['mother_cell'] = -1
-        ancestry = dict()
-        for ID in df[df.Timestep==0].ID.unique():
-            idx = df[df['ID'] ==ID].index
-            df.loc[idx,'mother_cell'] = ID
-            ancestry.update({ID:ID})
-
+        df.loc[df.Timestep==0,'mother_cell'] = df.loc[df.Timestep==0,'ID']
+        ancestry_df = df.loc[df.Timestep==0,['ID','mother_cell']]
+        type_=1
         for time in tqdm(sorted(df[df.Timestep!=0].Timestep.unique()),desc='Assigning ancestry'):
             for type_ in df.type.unique():
-                ancestors = df[(df.type==type_) & (df.Timestep==time) & (df.mother_cell.isin(ancestry.values()))]
-                arr1 = ancestors[['x','y','z']].to_numpy()
-                tree1 = KDTree(arr1)
-                motherless = df[(df.type==type_) & (df.Timestep==time) & (df.mother_cell == -1)]
+                temp = df.loc[(df.type==type_) & (df.Timestep==time),['ID','x','y','z']]
+                ancestors = temp.join(ancestry_df.set_index(['ID']),on='ID',how='inner', lsuffix='_left', rsuffix='_right')
+                arr = ancestors[['x','y','z']].to_numpy()
+                tree= KDTree(arr)
+                motherless = pd.merge(temp,ancestors,on='ID',how='left', indicator=True).query('_merge == "left_only"').drop('_merge', 1).drop('x_y',1).iloc[:,:4]
+
                 if not motherless.empty:
-                    d, i = tree1.query(motherless[['x','y','z']].to_numpy(), k=1)
-                    idx1 =motherless.index
-                    a = ancestors.iloc[i,:].mother_cell.values
-                    for id_,mother in zip(motherless.ID,a):
-                        ancestry.update({id_:mother})
-                        #df.loc[df.ID==id_,'mother_cell']=mother
-        df.drop('mother_cell',inplace=True,axis=1)
-        temp = pd.DataFrame.from_dict(ancestry,orient='index').reset_index()
-        temp.columns=['ID','mother_cell']
-        df = pd.merge(df,temp,on='ID')
+                    d, i = tree.query(motherless[['x_x','y_x','z_x']].to_numpy(), k=1)
+                    motherless.loc[:,'mother_cell'] = ancestors.iloc[i,4].to_numpy()
+                    ancestry_df = pd.concat([ancestry_df,motherless.loc[:,['ID','mother_cell']]],ignore_index=True)
+        df = df.join(ancestry_df.set_index(['ID']),on='ID',how='right', lsuffix='_left', rsuffix='').drop('mother_cell_left',1)
+
         df['total_biomass'] = df.groupby(['mother_cell','Timestep']).cumsum()['biomass']
         self.colonies = df
 
