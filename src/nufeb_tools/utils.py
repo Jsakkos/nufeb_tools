@@ -64,7 +64,7 @@ class get_data:
         self.numsteps = len(self.timepoints)
         self.Timesteps = self.positions.Timestep.unique()
         self.calc_biomass()
-        self.get_mothers()
+        #self.get_mothers()
         
     def get_local_data(self):
         """
