@@ -17,6 +17,8 @@ def fitness_metrics(obj):
         pandas.DataFrame: 
             Dataframe containing colony number (mother cell ID), cell type, total biomass, colony area, Voronoi area, nearest neighbor, mean neighbor distance, etc.
     """
+    if not hasattr(obj,'colonies'):
+        obj.get_mothers()
     obj.count_colony_area(obj.Timesteps[-1])
     D_suc = obj.metadata['Diff_c']['suc']
     mu_ecw = obj.metadata['ecw']['GrowthRate']
