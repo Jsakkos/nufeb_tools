@@ -68,7 +68,7 @@ def parse_args(args):
                     help='Set sucrose secretion ratio (0 to 1). Default is random.')   
     parser.add_argument('--muecw',dest='mu_ecw',action='store',default=6.71e-5,type=float,
                     help='E. coli W maximum growth rate')  
-    parser.add_argument('--mucya',dest='mu_cya',action='store',default=1.67e-5,type=float,
+    parser.add_argument('--mucya',dest='mu_cya',action='store',default=1.89e-5,type=float,
                     help='S. elongatus maximum growth rate')   
     parser.add_argument('--rhoecw',dest='rho_ecw',action='store',default=230,type=float,
         help='E. coli W cell density')  

@@ -344,6 +344,7 @@ class get_data:
             self.count_colony_area(time)
 
     def get_nutrient_grid(self,h5):
+        # TODO make nutrient grid function independent of h5 file
         keys = list(h5['concentration'].keys())
         timepoints = [k for k in h5['concentration'][keys[0]].keys()]
         timepoints.sort(key=int)
