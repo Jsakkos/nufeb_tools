@@ -43,7 +43,7 @@ class get_data:
     def __init__(self,directory=None,id=None,test=None,timestep=10):
         self.timestep=timestep
         if test:
-            self.directory = str((Path.home()) / '.nufeb_tools' / 'data' / 'Run_75_83_21_1_2021-12-03_977840')
+            self.directory = str((Path.home()) / '.nufeb_tools' / 'data' / 'Run_45_56_45_1_2021-12-03_671906')
             if not os.path.isdir(self.directory):
                 download_test_data()     
             self.get_local_data()
