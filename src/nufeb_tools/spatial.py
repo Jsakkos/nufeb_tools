@@ -7,7 +7,34 @@ from nufeb_tools import __version__
 # TODO modify to account for edge effects
 def fitness_metrics(obj):
     """
-    Function to calculate colony-level fitness metrics. Pairwise analysis was done between the cyanobacteria (type 1) and E. coli (type 2).
+    Function to calculate colony-level fitness metrics. 
+
+    Mother cell: Cell ID which seeded the colony
+    Type: Cell type - cyanobacteria are type 1  and E. coli are type 2
+    Voronoi area: Area of species-specific Voronoi Tesselation at the beginning of the simulation
+    SucRatio: Sucrose induction level
+    total biomass: Biomass of each colony at the end of the simulation (fg)
+    Nearest 1: Distance to nearest cyanobacteria colony
+    Nearest 2: Distance to nearest E. coli colony 
+    Nearest Neighbor: Distance to nearest colony
+    IC1: Average distance to nearest cyanobacteria colony
+    IC2: Average distance to nearest E. coli colony
+    IC: Average distance to nearest colony
+    Relative Neighbor Dist 1: Distance to nearest cyanobacteria colony divided by IC1
+    Relative Neighbor Dist 2: Distance to nearest E. coli colony divided by IC2
+    Relative Neighbor Dist: Distance to nearest colony divided by IC
+    Z1: Relative neighbor distance 1 divided by sqrt(D_sucrose/mu_cyano)
+    Z2: Relative neighbor distance 2 divided by sqrt(D_sucrose/mu_ecw)
+    Z1_2: Relative neighbor distance 1 divided by sqrt(D_sucrose/mu_ecw)
+    Z2_1: Relative neighbor distance 2 divided by sqrt(D_sucrose/mu_cyano)
+    LogNearest 1: log(Nearest 1)
+    LogNearest 2: log(Nearest 2)
+    LogNearest: log(Neatest Neighbot)
+    Inv1: Inverse sum of neighbor distance 1
+    Inv2: Inverse sum of neighbor distance 2
+    Log Inv1: Log squared inverse sum of neighbor distance 1
+    Log Inv2: Log squared inverse sum of neighbor distance 2
+    Colony Area: 2D area of colony at the end of the simulation
 
     Args:
         obj (nufeb_tools.utils.get_data): 
@@ -72,10 +99,10 @@ def fitness_metrics(obj):
     df3.loc[:,'Relative Neighbor Dist 1'] = df3.loc[:,'Nearest 1']/df3.loc[:,'IC1']
     df3.loc[:,'Relative Neighbor Dist 2'] = df3.loc[:,'Nearest 2']/df3.loc[:,'IC2']
     df3.loc[:,'Relative Neighbor Dist'] = df3.loc[:,'Nearest Neighbor']/df3.loc[:,'IC']
-    df3.loc[:,'Z1'] = df3.loc[:,'Relative Neighbor Dist 1']/np.sqrt(D_suc/mu_ecw)
-    df3.loc[:,'Z2'] = df3.loc[:,'Relative Neighbor Dist 2']/np.sqrt(D_suc/mu_cy)
-    df3.loc[:,'Z1_2'] = df3.loc[:,'Relative Neighbor Dist 1']/np.sqrt(D_suc/mu_cy)
-    df3.loc[:,'Z2_1'] = df3.loc[:,'Relative Neighbor Dist 2']/np.sqrt(D_suc/mu_ecw)
+    df3.loc[:,'Z1'] = df3.loc[:,'Relative Neighbor Dist 1']/np.sqrt(D_suc/mu_cy)
+    df3.loc[:,'Z2'] = df3.loc[:,'Relative Neighbor Dist 2']/np.sqrt(D_suc/mu_ecw)
+    df3.loc[:,'Z1_2'] = df3.loc[:,'Relative Neighbor Dist 1']/np.sqrt(D_suc/mu_ecw)
+    df3.loc[:,'Z2_1'] = df3.loc[:,'Relative Neighbor Dist 2']/np.sqrt(D_suc/mu_cy)
     df3.loc[:,'LogNearest 1'] = np.log(df3['Nearest 1'])
     df3.loc[:,'LogNearest 2'] = np.log(df3['Nearest 2'])
     df3.loc[:,'LogNearest'] = np.log(df3.loc[:,'Nearest Neighbor'])
