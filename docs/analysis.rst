@@ -9,6 +9,10 @@ Get Simulation Data
     :member-order: bysource
     :show-inheritance:
 
+Spatial Analysis
+----------------
+.. automodule:: nufeb_tools.spatial
+
 Plotting
 --------
 
