@@ -47,6 +47,7 @@ class get_data:
             if not os.path.isdir(self.directory):
                 download_test_data()     
             self.get_local_data()
+            self.sucRatio = int(self.directory.split('_')[3])
         elif directory:
             self.directory = directory
             self.get_local_data()
