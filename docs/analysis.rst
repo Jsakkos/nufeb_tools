@@ -11,7 +11,21 @@ Get Simulation Data
 
 Spatial Analysis
 ----------------
-.. automodule:: nufeb_tools.spatial
+.. autofunction:: nufeb_tools.spatial.fitness_metrics
+    :members:
+    :undoc-members:
+    :member-order: bysource
+    :show-inheritance:
+
+.. code-block:: python
+    
+    from nufeb_tools import utils, spatial
+    x = utils.get_data(directory = None,test=True)
+    metrics = spatial(x)
+    metrics.head()
+.. csv-table:: Metrics
+   :file: _static/tables/metrics.csv
+   :header-rows: 1
 
 Plotting
 --------
