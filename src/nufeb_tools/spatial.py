@@ -7,7 +7,7 @@ from nufeb_tools import __version__
 # TODO modify to account for edge effects
 def fitness_metrics(obj):
     """
-    Function to calculate colony-level fitness metrics 
+    Function to calculate colony-level fitness metrics. Pairwise analysis was done between the cyanobacteria (type 1) and E. coli (type 2).
 
     Args:
         obj (nufeb_tools.utils.get_data): 
