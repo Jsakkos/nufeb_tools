@@ -12,10 +12,6 @@ Get Simulation Data
 Spatial Analysis
 ----------------
 .. autofunction:: nufeb_tools.spatial.fitness_metrics
-    :members:
-    :undoc-members:
-    :member-order: bysource
-    :show-inheritance:
 
 .. code-block:: python
     
