@@ -99,7 +99,7 @@ def parse_args(args):
     const=logging.DEBUG,
 )
     return parser.parse_args(args)
-
+# TODO Change sucRatio to IPTG
 def setup_logging(loglevel):
     """Setup basic logging
 
