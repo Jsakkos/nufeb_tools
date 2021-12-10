@@ -47,15 +47,12 @@ class get_data:
             if not os.path.isdir(self.directory):
                 download_test_data()     
             self.get_local_data()
-            self.sucRatio = int(self.directory.split('_')[3])
         elif directory:
             self.directory = directory
             self.get_local_data()
-            self.sucRatio = int(self.directory.split('_')[3])
         elif id:
             self.id = id
             self.get_datafed_data()
-            self.sucRatio = int(self.directory.split('_')[3])
         elif directory and id:
             print('Define either a local directory or DataFed Collection ID, not both')
         else:
@@ -98,6 +95,13 @@ class get_data:
         f = open(os.path.join(self.directory,'metadata.json'),'r')
         self.metadata  = json.load(f)
         f.close()
+        if 'IPTG' in self.metadata:
+            self.IPTG = self.metadata['IPTG']
+            self.sucRatio = self.metadata['IPTG']
+        else:
+            self.IPTG = self.metadata['SucRatio']
+            # TODO replace sucRatio with IPTG
+            self.sucRatio = self.metadata['SucRatio']
         self.convert_units_avg_con()
         self.convert_units_biomass()
 
