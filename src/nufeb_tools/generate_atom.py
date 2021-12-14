@@ -1,4 +1,5 @@
 import random
+from scipy.stats import loguniform
 import argparse
 import numpy as np
 from string import Template
@@ -66,6 +67,8 @@ def parse_args(args):
     help='Number of cyanobacteria and e.coli to initialize simulation with, `e.g., 100,100. ` Default is random number between 1 and 100.')
     parser.add_argument('--sucR',dest='SucRatio',action='store',default=None,
                     help='Set sucrose secretion ratio (0 to 1). Default is random.')   
+    parser.add_argument('--iptg',dest='iptg',action='store',default=None,type=float,
+                    help='Set IPTG induction for sucrose secretion (0 to 1). Default is random.') 
     parser.add_argument('--muecw',dest='mu_ecw',action='store',default=6.71e-5,type=float,
                     help='E. coli W maximum growth rate')  
     parser.add_argument('--mucya',dest='mu_cya',action='store',default=1.89e-5,type=float,
@@ -148,10 +151,15 @@ def main(args):
         os.mkdir('runs')
     today = str(date.today())
     for n in range(1,int(args.num)+1):
-        if args.SucRatio is not None:
-            SucRatio = float(args.SucRatio)
+        if args.iptg is not None:
+            IPTG = float(args.iptg)
+            SucRatio = IPTG
         else:
-            SucRatio = round(random.random(),3)
+            IPTG = np.round(loguniform.rvs(1e-3, 1e0, size=1)[0],5)
+            SucRatio = IPTG
+        #if args.SucRatio is not None:
+        #    SucRatio = float(args.SucRatio)
+
         SucPct = int(SucRatio*100)
         if args.culture_type == 'co':
             cell_types = ['cyano','ecw']
@@ -190,7 +198,7 @@ def main(args):
             ecwGroup = 'group ECW type 1'
             cyDiv = ''
             ecwDiv = f'fix d2 ECW divide 100 v_EPSdens v_divDia2 {random.randint(1,1e6)}'
-        RUN_DIR = Path(f'runs/Run_{n_cyanos}_{n_ecw}_{SucPct}_{args.reps}_{today}_{random.randint(1,1e6)}')
+        RUN_DIR = Path(f'runs/Run_{n_cyanos}_{n_ecw}_{IPTG:.2e}_{args.reps}_{today}_{random.randint(1,1e6)}')
         if not os.path.isdir(RUN_DIR):
             os.mkdir(RUN_DIR)
         # TODO embed cell type into metadata file and generate cell type programmatically
@@ -307,7 +315,7 @@ def main(args):
         #do the substitution
         result = src.safe_substitute({'n' : n, 'SucRatio' : SucRatio, 'SucPct' : SucPct,
                                     'n_cyanos' : n_cyanos, 'n_ecw' : n_ecw,
-                                    'Replicates' : args.reps,'Timesteps' : args.timesteps,
+                                    'Replicates' : args.reps,'IPTG' : IPTG,'Timesteps' : args.timesteps,
                                     'date' : today,
                                     'CYANOGroup' : cyGroup,
                                     'ECWGroup' : ecwGroup,
