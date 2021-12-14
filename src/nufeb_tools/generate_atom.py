@@ -282,7 +282,7 @@ def main(args):
             L.append('\n\n')
 
             #write atom definition file
-            f= open(RUN_DIR / f"atom_{n_cyanos}_{n_ecw}_{SucPct}_{r}_{today}.in","w+")
+            f= open(RUN_DIR / f"atom_{n_cyanos}_{n_ecw}_{IPTG:.0e}_{r}_{today}.in","w+")
             f.writelines(L)
 
         #write initial conditions json file
@@ -315,7 +315,7 @@ def main(args):
         #do the substitution
         result = src.safe_substitute({'n' : n, 'SucRatio' : SucRatio, 'SucPct' : SucPct,
                                     'n_cyanos' : n_cyanos, 'n_ecw' : n_ecw,
-                                    'Replicates' : args.reps,'IPTG' : IPTG,'Timesteps' : args.timesteps,
+                                    'Replicates' : args.reps,'IPTG' : f'{IPTG:.0e}','Timesteps' : args.timesteps,
                                     'date' : today,
                                     'CYANOGroup' : cyGroup,
                                     'ECWGroup' : ecwGroup,
@@ -327,7 +327,7 @@ def main(args):
                                     'vtk' : vtk,
                                     'grid' : grid
                                     })
-        f= open(RUN_DIR / f"Inputscript_{n_cyanos}_{n_ecw}_{SucPct}_{today}.lammps","w+")
+        f= open(RUN_DIR / f"Inputscript_{n_cyanos}_{n_ecw}_{IPTG:.0e}_{today}.lammps","w+")
         f.writelines(result)
 
 
@@ -340,7 +340,7 @@ def main(args):
         # TODO actually make this work
             df_api = API()
             df_api.setContext('p/eng107')
-            collectionName = f'NUFEB_{n_cyanos}_{n_ecw}_{SucPct}_{today}_{x}_{y}_{z}'
+            collectionName = f'NUFEB_{n_cyanos}_{n_ecw}_{IPTG:.0e}_{today}_{x}_{y}_{z}'
             parent_collection = df_api.getAuthUser().split('/')[1]
             coll_msg = df_api.collectionCreate(collectionName,
                                             parent_id=parent_collection)
