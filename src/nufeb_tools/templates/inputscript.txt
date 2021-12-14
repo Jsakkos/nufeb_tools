@@ -7,10 +7,7 @@ newton		off
 processors  * * *
 
 comm_modify	vel yes
-#variable reps loop ${Replicates}
-read_data_bio atom_${n_cyanos}_${n_ecw}_${SucPct}_${Replicates}_${date}.in
-#shell mkdir Run_${n_cyanos}_${n_ecw}_${SucPct}_${Replicates}
-#shell cd Run_${n_cyanos}_${n_ecw}_${SucPct}_${Replicates}
+read_data_bio atom_${n_cyanos}_${n_ecw}_${IPTG}_${Replicates}_${date}.in
 ##############Define initial particle distribution##############
 
 lattice sc 1e-6 origin 0 0 0
@@ -94,7 +91,4 @@ thermo_modify	lost ignore
 
 
 run $Timesteps
-#shell cd ..
-#clear
-#next reps
-#jump SELF
+
