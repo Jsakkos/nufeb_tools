@@ -15,7 +15,7 @@ def fitness_metrics(obj):
 
     Voronoi area: Area of species-specific Voronoi Tesselation at the beginning of the simulation
 
-    SucRatio: Sucrose induction level
+    IPTG: Sucrose induction level
 
     total biomass: Biomass of each colony at the end of the simulation (fg)
 
@@ -86,7 +86,7 @@ def fitness_metrics(obj):
         IDs.loc[:,'Voronoi Area'] = areas[1:]
         dfs.append(IDs)
     metrics = pd.concat(dfs)
-    metrics.loc[:,'sucRatio'] = obj.sucRatio
+    metrics.loc[:,'IPTG'] = obj.IPTG
     # total biomass per colony
     biomasses = df[df.Timestep==obj.Timesteps[-1]].groupby('mother_cell').sum().reset_index()[['mother_cell','biomass']]
     biomasses.columns=['mother_cell','total biomass']
