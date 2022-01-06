@@ -123,19 +123,19 @@ def growth_curve_panel(df,**kwargs):
             Additional arguments to pass to plt.plot
     """
 
-    rows=round(np.sqrt(len(df.id.unique())))
-    cols = int(np.ceil(len(df.id.unique())/rows))
+    rows=round(np.sqrt(len(df.ID.unique())))
+    cols = int(np.ceil(len(df.ID.unique())/rows))
     fig ,axes = plt.subplots(nrows=rows,ncols=cols,sharex=True,figsize=(14,8))
     axs = axes.ravel()
     for i in df.id.unique():
-        celltype=df[(df.id==i) & (df.time ==0)].type.values[0]
+        celltype=df[(df.ID==i) & (df.time ==0)].type.values[0]
         if celltype==1:
             color = '#2ca25f'
         elif celltype ==2:
             color = '#de2d26'
         elif celltype ==0:
             print('Celltype is 0',i,celltype)
-        axs[i-1].plot(df[(df.id==i)].biomass.values,c=color)
+        axs[i-1].plot(df[(df.ID==i)].biomass.values,c=color)
         #axs[i].set_title(f['type']['0'][c])
     for ax in axs:
         ax.spines['right'].set_visible(False)
@@ -159,11 +159,11 @@ def growth_rate_div(df, **kwargs):
     celltypes = df.type.unique()
     celltypes.sort()
     for ct in celltypes:
-        divs = pd.DataFrame(columns=['id','division','rate'])
-        cells = df.id.unique()
+        divs = pd.DataFrame(columns=['ID','Division','Rate'])
+        cells = df.ID.unique()
         #cells.sort()
         for cell in cells:
-            data = df[(df.id==cell) & (df.type==ct)].reset_index()
+            data = df[(df.ID==cell) & (df.type==ct)].reset_index()
             pks,_ = find_peaks(data.biomass)
             p0 = 0
             for i,p1 in enumerate(pks):
@@ -172,11 +172,11 @@ def growth_rate_div(df, **kwargs):
                 dt = data.time[p1]-data.time[p0]
                 dy = data.biomass[p1]-data.biomass[p0]
                 dydt = dy/dt
-                divs = divs.append(pd.DataFrame([[cell,i+1,dydt]],columns=['id','division','rate']),ignore_index=True)
+                divs = divs.append(pd.DataFrame([[cell,i+1,dydt]],columns=['ID','Division','Rate']),ignore_index=True)
                 #print(dydt)
                 p0=p1+1
         #plot cell id vs division rate over time
-        piv = divs.pivot_table(index='id', columns='division', values='rate')
+        piv = divs.pivot_table(index='ID', columns='Division', values='Rate')
         g = sns.heatmap(piv, cmap='coolwarm',ax=axes[ct-1])
         cbar = g.collections[0].colorbar
         cbar.ax.set_ylabel(r'Growth rate ($\frac{fg}{hr}$)')
@@ -210,9 +210,9 @@ def growth_rate_time(df, period =3):
     celltypes = df.type.unique()
     celltypes.sort()
     for ct in celltypes:
-        rates = df[df.type==ct][['id','time','rate']]
+        rates = df[df.type==ct][['ID','time','rate']]
         #plot cell id vs division rate over time
-        piv = rates.pivot_table(index='id',columns='time', values='rate')
+        piv = rates.pivot_table(index='ID',columns='time', values='rate')
         g = sns.heatmap(piv, cmap='coolwarm',ax=axes[ct-1])
         cbar = g.collections[0].colorbar
         cbar.ax.set_ylabel(r'Growth rate ($\frac{fg}{hr}$)')
