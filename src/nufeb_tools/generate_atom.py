@@ -81,6 +81,8 @@ def parse_args(args):
         help='E. coli W Ksuc')  
     parser.add_argument('--maintecw',dest='maint_ecw',action='store',default=9.50e-7,type=float,
         help='E. coli W maintenance cost')  
+    parser.add_argument('--mass',dest='mass_max',action='store',default=1.5e-11,type=float,
+        help='Maximum biomass')  
 
     parser.add_argument('--vtk',dest='vtk',action='store',default=False,help='Output VTK files')
     parser.add_argument('--h5',dest='hdf5',action='store',default=True,help='Output HDF5 files')
@@ -174,6 +176,8 @@ def main(args):
             ecwGroup = 'group ECW type 2'
             cyDiv = f'fix d1 CYANO divide 100 v_EPSdens v_divDia1 {random.randint(1,1e6)}'
             ecwDiv = f'fix d2 ECW divide 100 v_EPSdens v_divDia2 {random.randint(1,1e6)}'
+            masses = 'c_myMass[1]+c_myMass[2]'
+
         elif args.culture_type == 'ax-c':
             cell_types = ['cyano']
             if args.cells is not None:
@@ -186,6 +190,7 @@ def main(args):
             ecwGroup = ''
             cyDiv = f'fix d1 CYANO divide 100 v_EPSdens v_divDia1 {random.randint(1,1e6)}'
             ecwDiv = ''
+            masses = 'c_myMass[1]'
         elif args.culture_type == 'ax-e':
             cell_types = ['ecw']
             if args.cells is not None:
@@ -198,6 +203,7 @@ def main(args):
             ecwGroup = 'group ECW type 1'
             cyDiv = ''
             ecwDiv = f'fix d2 ECW divide 100 v_EPSdens v_divDia2 {random.randint(1,1e6)}'
+            masses = 'c_myMass[1]'
         RUN_DIR = Path(f'runs/Run_{n_cyanos}_{n_ecw}_{IPTG:.2e}_{args.reps}_{today}_{random.randint(1,1e6)}')
         if not os.path.isdir(RUN_DIR):
             os.mkdir(RUN_DIR)
@@ -325,7 +331,9 @@ def main(args):
                                     'lammps' : lammps,
                                     'hdf5' : hdf5,
                                     'vtk' : vtk,
-                                    'grid' : grid
+                                    'grid' : grid,
+                                    'masses':masses,
+                                    'mass_max':f'{args.mass_max:.2e}'
                                     })
         f= open(RUN_DIR / f"Inputscript_{n_cyanos}_{n_ecw}_{IPTG:.0e}_{today}.lammps","w+")
         f.writelines(result)
