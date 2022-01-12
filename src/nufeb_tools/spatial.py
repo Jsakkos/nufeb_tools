@@ -49,7 +49,7 @@ def fitness_metrics(obj):
 
     LogNearest 2: log(Nearest 2)
 
-    LogNearest: log(Neatest Neighbot)
+    LogNearest: log(Nearest Neighbor)
 
     Inv1: Inverse sum of neighbor distance 1
 
@@ -87,10 +87,14 @@ def fitness_metrics(obj):
         dfs.append(IDs)
     metrics = pd.concat(dfs)
     metrics.loc[:,'IPTG'] = obj.IPTG
+    x_max = obj.metadata['Dimensions'][0]
+    y_max = obj.metadata['Dimensions'][1]
+    metrics.loc[:,'Distance from center']=df.loc[(df.Timestep==0)].apply(lambda x:np.sqrt((x_max/2-x['x'])**2 +(y_max/2-x['y'])**2),axis=1)
     # total biomass per colony
     biomasses = df[df.Timestep==obj.Timesteps[-1]].groupby('mother_cell').sum().reset_index()[['mother_cell','biomass']]
     biomasses.columns=['mother_cell','total biomass']
-
+    initial_biomass = df[df.Timestep==0].groupby('mother_cell').sum().reset_index()[['mother_cell','biomass']]
+    initial_biomass.columns=['mother_cell','initial biomass']
     # Calculate nearest neighbors
     df3 = df[df.Timestep == 0]
     arr = df3[['x','y','z']].to_numpy()
@@ -172,5 +176,5 @@ def fitness_metrics(obj):
     metrics = metrics.merge(biomasses,on='mother_cell')
     metrics = metrics.merge(df3,on='mother_cell')
     metrics = metrics.merge(colony_area,on='mother_cell')
-    metrics
+    metrics = metrics.merge(initial_biomass,on='mother_cell')
     return metrics
