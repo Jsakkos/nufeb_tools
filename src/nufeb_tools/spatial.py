@@ -87,6 +87,7 @@ def fitness_metrics(obj):
         dfs.append(IDs)
     metrics = pd.concat(dfs)
     metrics.loc[:,'IPTG'] = obj.IPTG
+    metrics.loc[:,'Time'] = df.time.iloc[-1]
     x_max = obj.metadata['Dimensions'][0]
     y_max = obj.metadata['Dimensions'][1]
     metrics.loc[:,'Distance from center']=df.loc[(df.Timestep==0)].apply(lambda x:np.sqrt((x_max/2-x['x'])**2 +(y_max/2-x['y'])**2),axis=1)
