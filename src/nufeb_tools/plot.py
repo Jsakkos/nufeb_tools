@@ -1,10 +1,32 @@
 import seaborn as sns
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 from scipy.signal import find_peaks
 from scipy.optimize import curve_fit
 import numpy as np
 import cv2
+
+
+def colorFaderRGB(c1,c2,n):
+    """fade (linear interpolate) from color c1 (at mix=0) to c2 (mix=1)
+
+    Args:
+        c1 (str): Starting color
+        c2 (str): Ending color
+        n (int): Number of gradations
+
+    Returns:
+        list(tuple): List containing tuples of RGB colors
+    """
+
+    mix = np.linspace(0,1,n+1)
+    c1=np.array(mpl.colors.to_rgb(c1))
+    c2=np.array(mpl.colors.to_rgb(c2))
+    cols = list()
+    for i in range(n):
+        cols.append(tuple((((1-mix[i])*c1 + mix[i]*c2)*256).astype('int')))
+    return cols
 
 def overall_growth(df,ax=None, **kwargs):
     """
@@ -308,7 +330,7 @@ def growth_rate_mu(df, **kwargs):
     axes[1].set_title('E. coli')
     fig.tight_layout()
     return
-def colony(obj,time,colors=None,colony=None,ax=None,by=None,img=np.array([]),**kwargs):
+def colony(obj,time,colors=None,colony=None,ax=None,by=None,img=np.array([]),fitness=None,overlay=None,**kwargs):
     """
     Plot bacterial colonies at a specific timepoint
 
@@ -318,13 +340,19 @@ def colony(obj,time,colors=None,colony=None,ax=None,by=None,img=np.array([]),**k
         time (int): 
             Simulation timestep to plot
         colors (dict, optional): 
-            Dictionary of colors to plot each colony. Defaults to None.
+            Dictionary of colors to plot each colony. Defaults to random.
         colony (int, optional): 
             Plot a specific colony. Defaults to None.
         ax (matplotlib.pyplot.axes, optional): 
             Axis to plot on. Defaults to None.
         by (str, optional): 
             Plot by species. Defaults to None.
+        img (np.array, optional):
+            Image array to overlay colonies onto.
+        fitness (pandas.DataFrame,optional):
+            Takes a dataframe containing spatial metrics data as an input or if bool, will calculate the metrics internally. Defaults to None.
+        overlay (bool, optional):
+            If True, plot a specific colony on top of the others.
     """
 
     if not hasattr(obj,'colonies'):
@@ -337,32 +365,71 @@ def colony(obj,time,colors=None,colony=None,ax=None,by=None,img=np.array([]),**k
         img_size = 2000
         bk = 255 * np.ones(shape=[img_size, img_size, 3], dtype=np.uint8)
     else:
-        img_size = img.size[0]
+        img_size = img.shape[0]
         bk = img
     if by == 'Species' or by == 'species' or by == 'type':
-        colors = {1 : (26,150,65) ,2 : (230,97,1)}
+
+        colors = dict()
+        IDs1 =np.sort(df.loc[df.type==1].mother_cell.unique())
+        cya = colorFaderRGB('#01665e','#c7eae5',len(IDs1))
+
+        colors.update({i+1: cya[i] for i,_ in enumerate(IDs1)})
+        IDs2 =np.sort(df.loc[df.type==2].mother_cell.unique())
+        ecw = colorFaderRGB('#8c510a','#f6e8c3',len(IDs2))
+
+        colors.update({i+len(IDs1)+1: ecw[i] for i,_ in enumerate(IDs2)})
         tp = df[df.Timestep == timepoint]
         circles = [cv2.circle(bk,center = (round(x/dims[0]*img_size),
-                    round(y/dims[1]*img_size)),radius = round(radius/dims[1]*img_size),
-                    color = (int(colors[type_][0]),int(colors[type_][1]),int(colors[type_][2])),thickness = -1) for x,y, radius,type_ in zip(tp.x,tp.y,tp.radius,tp.type)]
+            round(y/dims[1]*img_size)),radius = round(radius/dims[1]*img_size),
+            color = (int(colors[cell][0]),int(colors[cell][1]),int(colors[cell][2])),thickness = -1) for x,y, radius,cell in zip(tp.x,tp.y,tp.radius,tp.mother_cell)]
+        if fitness is not None:
+            if fitness is True:
+                from nufeb_tools import spatial
+                fitness = spatial.fitness_metrics(obj)
+            if isinstance(fitness, pd.DataFrame):
+                # mark center of E. coli colonies
+                tp = df.loc[(df.Timestep == 0) & (df.type==2)]
+                circles = [cv2.circle(bk,center = (round(x/dims[0]*img_size),
+                round(y/dims[1]*img_size)),radius = round(radius/dims[1]*img_size),
+                color = (0,0,0),thickness = -1) for x,y, radius,cell in zip(tp.x,tp.y,tp.radius,tp.mother_cell)]
+
+                fit_list =fitness.sort_values(by=['total biomass'],ascending=False).loc[fitness.type==2].reset_index(drop=True)['mother_cell'].to_numpy()
+                fit_dict = {x:str(list(fit_list).index(x)+1) for x in fit_list}
+                text = [cv2.putText(bk,fit_dict[cell],org = (round(x/dims[0]*img_size*0.95),
+                round(y/dims[1]*img_size*0.99)),fontFace=cv2.FONT_HERSHEY_SIMPLEX,fontScale=1,color=(0,0,0),thickness = 2) for x,y, cell in zip(tp.x,tp.y,tp.mother_cell)]
     elif colony == None and by == None:
         if colors == None:
-            IDs = sorted(df[df.mother_cell != -1].mother_cell.unique())
-            colors = {x : tuple(np.random.randint(0,256, 3).astype('int')) for x in IDs}
+            IDs = np.sort(df[df.mother_cell != -1].mother_cell.unique())
+            colors = {x : tuple(np.random.randint(0,255, 3).astype('int')) for x in IDs}
         tp = df[df.Timestep == timepoint]
         circles = [cv2.circle(bk,center = (round(x/dims[0]*img_size),
                     round(y/dims[1]*img_size)),radius = round(radius/dims[1]*img_size),
                     color = (int(colors[cell][0]),int(colors[cell][1]),int(colors[cell][2])),thickness = -1) for x,y, radius,cell in zip(tp.x,tp.y,tp.radius,tp.mother_cell)]
-    else:
+
+    elif colony != None:
         if colors == None:
-            colors = tuple(np.random.randint(0,256, 3).astype('int'))
+            colors = tuple(np.random.randint(0,255, 3).astype('int'))
         color = colors
+        if overlay is True:
+            colors = dict()
+            IDs1 =np.sort(df.loc[df.type==1].mother_cell.unique())
+            cya = colorFaderRGB('#01665e','#c7eae5',len(IDs1))
+
+            colors.update({i+1: cya[i] for i,_ in enumerate(IDs1)})
+            IDs2 =np.sort(df.loc[df.type==2].mother_cell.unique())
+            ecw = colorFaderRGB('#8c510a','#f6e8c3',len(IDs2))
+
+            colors.update({i+len(IDs1)+1: ecw[i] for i,_ in enumerate(IDs2)})
+            tp = df[df.Timestep == timepoint]
+            circles = [cv2.circle(bk,center = (round(x/dims[0]*img_size),
+                round(y/dims[1]*img_size)),radius = round(radius/dims[1]*img_size),
+                color = (int(colors[cell][0]),int(colors[cell][1]),int(colors[cell][2])),thickness = -1) for x,y, radius,cell in zip(tp.x,tp.y,tp.radius,tp.mother_cell)]
         tp = df[(df.Timestep == timepoint) & (df.mother_cell==colony)]
+
         circles = [cv2.circle(bk,center = (round(x/dims[0]*img_size),
                     round(y/dims[1]*img_size)),radius = round(radius/dims[1]*img_size),
                     color = (int(color[0]),int(color[1]),int(color[2])),thickness = -1) for x,y, radius,cell in zip(tp.x,tp.y,tp.radius,tp.mother_cell)]
-
     ax.imshow(bk)
     ax.axes.xaxis.set_visible(False)
     ax.axes.yaxis.set_visible(False)
-    return (ax)
+    return bk

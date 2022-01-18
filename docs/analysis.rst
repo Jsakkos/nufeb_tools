@@ -112,14 +112,14 @@ Whole Colony Plotting
 ^^^^^^^^^^^^^^^^^^^^^
 .. autofunction:: nufeb_tools.plot.colony
 
-.. image:: _static/images/testcolony.png
+.. image:: _static/images/colonies.png
    :align: center
 
 .. code-block:: python
 
     from nufeb_tools import utils, plot
     import matplotlib.pyplot as plt
-    x = utils.get_data(directory= r'D:\runs\Run_21_18_56_1_2021-07-12')
+x = utils.get_data(directory=r'E:\sucrose\runs\Run_50_50_1.00e+00_1_2022-01-11_48525')
     f,ax = plt.subplots()
     plot.colony(x,35000,colors,ax=ax)
     plt.show()
@@ -133,9 +133,9 @@ Plot colonies over time by species:
 
     from nufeb_tools import utils, plot
     import matplotlib.pyplot as plt
-    x = utils.get_data(directory= r'D:\runs\Run_21_18_56_1_2021-07-12')
+x = utils.get_data(directory=r'E:\sucrose\runs\Run_50_50_1.00e+00_1_2022-01-11_48525')
     f, axes = plt.subplots(ncols=3,figsize=(15,5))
-    for ax, time in zip(axes,[100,20000,35000]):
+    for ax, time in zip(axes,[100,20000,25900]):
         plot.plot_colony(x,time,by='Species',ax=ax)
     plt.show()
 

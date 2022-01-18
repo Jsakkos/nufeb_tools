@@ -49,12 +49,12 @@ Plot colonies based on initial seed cells
 
     from nufeb_tools import utils, plot
     import matplotlib.pyplot as plt
-    x = utils.get_data(directory= r'D:\runs\Run_21_18_56_1_2021-07-12')
+x = utils.get_data(directory=r'E:\sucrose\runs\Run_50_50_1.00e+00_1_2022-01-11_48525')
     f,ax = plt.subplots()
-    plot.colony(x,35000,colors,ax=ax)
+    plot.colony(x,25900,colors,ax=ax)
     plt.show()
 
-.. image:: /docs/_static/images/testcolony.png
+.. image:: /docs/_static/images/colonies.png
    :align: center
 
 
