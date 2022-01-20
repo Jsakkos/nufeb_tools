@@ -149,7 +149,7 @@ def growth_curve_panel(df,**kwargs):
     cols = int(np.ceil(len(df.ID.unique())/rows))
     fig ,axes = plt.subplots(nrows=rows,ncols=cols,sharex=True,figsize=(14,8))
     axs = axes.ravel()
-    for i in df.id.unique():
+    for i in df.ID.unique():
         celltype=df[(df.ID==i) & (df.time ==0)].type.values[0]
         if celltype==1:
             color = '#2ca25f'
@@ -250,7 +250,7 @@ def growth_rate_time(df, period =3):
     return
 
 def get_growth_intervals(dataframe,cellID):
-    df = dataframe[dataframe.id==cellID].reset_index(drop=True)
+    df = dataframe[dataframe.ID==cellID].reset_index(drop=True)
     biomass = df.biomass
     time = df.time
     pks = find_peaks(biomass)[0]
@@ -294,11 +294,11 @@ def growth_rate_mu(df, **kwargs):
     celltypes.sort()
     fig, axes = plt.subplots(ncols=2,figsize=(14,7))
     for ct in celltypes:
-        divs = pd.DataFrame(columns=['id','division','rate'])
-        cells = df[df.type==ct].id.unique()
+        divs = pd.DataFrame(columns=['ID','division','rate'])
+        cells = df[df.type==ct].ID.unique()
         cells.sort()
         for cell in cells:
-            data = df[(df.id==cell) & (df.type==ct)].reset_index(drop=True)
+            data = df[(df.ID==cell) & (df.type==ct)].reset_index(drop=True)
             pks,_ = find_peaks(data.biomass)
             intervals = list()
             for i in range(len(pks)+1):
@@ -318,11 +318,11 @@ def growth_rate_mu(df, **kwargs):
                 if len(biomass_measured) > 4:
                     popt, pcov = curve_fit(func, t_measured, biomass_measured)
                     #print(round(popt[1],4))
-                    divs = divs.append(pd.DataFrame([[cell,i+1,round(popt[1],4)]],columns=['id','division','mu']),ignore_index=True)
+                    divs = divs.append(pd.DataFrame([[cell,i+1,round(popt[1],4)]],columns=['ID','division','mu']),ignore_index=True)
                     #plot cell id vs division rate over time
 
         #plot cell id vs division rate over time
-        piv = divs.pivot_table(index='id', columns='division', values='mu')
+        piv = divs.pivot_table(index='ID', columns='division', values='mu')
         g = sns.heatmap(piv, cmap='coolwarm',ax=axes[ct-1])
         cbar = g.collections[0].colorbar
         cbar.ax.set_ylabel(r'Growth rate ($\frac{1}{hr}$)')
