@@ -81,7 +81,7 @@ def parse_args(args):
         help='E. coli W Ksuc')  
     parser.add_argument('--maintecw',dest='maint_ecw',action='store',default=9.50e-7,type=float,
         help='E. coli W maintenance cost')  
-    parser.add_argument('--mass',dest='mass_max',action='store',default=1.5e-11,type=float,
+    parser.add_argument('--mass',dest='mass_max',action='store',default=None,type=float,
         help='Maximum biomass')  
 
     parser.add_argument('--vtk',dest='vtk',action='store',default=False,help='Output VTK files')
@@ -152,6 +152,10 @@ def main(args):
     if not os.path.isdir('runs'):
         os.mkdir('runs')
     today = str(date.today())
+    if args.mass_max is not None:
+        max_mass = float(args.mass_max)
+    else:
+        max_mass = 1.5e-11*np.prod([float(x) for x in args.dims.split(',')])/(1e-4*1e-4*1e-5)
     for n in range(1,int(args.num)+1):
         if args.iptg is not None:
             IPTG = float(args.iptg)
@@ -333,7 +337,7 @@ def main(args):
                                     'vtk' : vtk,
                                     'grid' : grid,
                                     'masses':masses,
-                                    'mass_max':f'{args.mass_max:.2e}'
+                                    'mass_max':f'{max_mass:.2e}'
                                     })
         f= open(RUN_DIR / f"Inputscript_{n_cyanos}_{n_ecw}_{IPTG:.0e}_{today}.lammps","w+")
         f.writelines(result)
