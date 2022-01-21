@@ -4,6 +4,10 @@ nufeb_tools
 
 |docs|  |pypi|  |tests|
 
+
+.. image:: https://zenodo.org/badge/372038007.svg
+   :target: https://zenodo.org/badge/latestdoi/372038007
+
 Description
 ===========
 
