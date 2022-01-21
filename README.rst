@@ -2,11 +2,10 @@
 nufeb_tools
 ===========
 
-|docs|  |pypi|  |tests|
+|docs|  |pypi|  |tests|  |DOI|
 
 
-.. image:: https://zenodo.org/badge/372038007.svg
-   :target: https://zenodo.org/badge/latestdoi/372038007
+
 
 Description
 ===========
@@ -73,3 +72,6 @@ Plot colonies based on initial seed cells
 .. |tests| image:: https://github.com/Jsakkos/nufeb-tools/actions/workflows/Test.yml/badge.svg
         :alt: Tox testing status
 
+
+.. |DOI| image:: https://zenodo.org/badge/372038007.svg
+        :target: https://zenodo.org/badge/latestdoi/372038007
