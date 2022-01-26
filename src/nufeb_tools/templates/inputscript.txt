@@ -11,7 +11,7 @@ read_data_bio atom_${n_cyanos}_${n_ecw}_${IPTG}_${Replicates}_${date}.in
 ##############Define initial particle distribution##############
 
 lattice sc 1e-6 origin 0 0 0
-region reg block 0 1000 0 1000 0 100
+#region reg block 0 1000 0 1000 0 100
 
 ${CYANOGroup}
 ${ECWGroup}
