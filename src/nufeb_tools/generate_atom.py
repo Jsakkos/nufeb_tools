@@ -84,7 +84,7 @@ def parse_args(args):
     parser.add_argument('--mass',dest='mass_max',action='store',default=None,type=float,
         help='Maximum biomass')  
 
-    parser.add_argument('--vtk',dest='vtk',action='store',default=False,help='Output VTK files')
+    parser.add_argument('--vtk',dest='vtk',action='store',default=False,type=bool,help='Output VTK files')
     parser.add_argument('--h5',dest='hdf5',action='store',default=True,help='Output HDF5 files')
     parser.add_argument('--lammps',dest='lammps',action='store',default=False,help='Output lammps files')
     parser.add_argument(
