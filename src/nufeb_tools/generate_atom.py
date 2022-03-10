@@ -234,7 +234,7 @@ def clean():
     """Remove old NUFEB runs"""
     if os.path.isdir("runs"):
         import shutil
-
+        # TODO add folder removal to logger
         try:
             shutil.rmtree("runs")
         except OSError as e:
@@ -275,6 +275,7 @@ def main(args):
             * np.prod([float(x) for x in args.dims.split(",")])
             / (1e-4 * 1e-4 * 1e-5)
         )
+    # TODO add file generation details to logger
     for n in range(1, int(args.num) + 1):
         if args.iptg is not None:
             IPTG = float(args.iptg)
@@ -379,6 +380,7 @@ def main(args):
             "Diff_c": {"sub": 0, "o2": 2.30e-9, "suc": 5.2e-10, "co2": 1.9e-09},
             "Dimensions": [float(x) for x in args.dims.split(",")],
             "SucRatio": SucRatio,
+            "IPTG": IPTG,
             "Replicates": int(args.reps),
         }
         grids = int(args.grid)
