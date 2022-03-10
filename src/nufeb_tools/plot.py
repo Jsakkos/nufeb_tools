@@ -362,10 +362,11 @@ def colony(obj,time,colors=None,colony=None,ax=None,by=None,img=np.array([]),fit
     timepoint = time
     dims=obj.metadata['Dimensions']
     if img.size==0:
-        img_size = 2000
-        bk = 255 * np.ones(shape=[img_size, img_size, 3], dtype=np.uint8)
+        px_per_micron = 20
+        img_size = [int(px_per_micron*dims[1]*1e6),int(px_per_micron*dims[0]*1e6)]
+        bk = 255 * np.ones(shape=[img_size[0], img_size[1], 3], dtype=np.uint8)
     else:
-        img_size = img.shape[0]
+        img_size = img.shape[:2]
         bk = img
     if by == 'Species' or by == 'species' or by == 'type':
 
@@ -379,8 +380,8 @@ def colony(obj,time,colors=None,colony=None,ax=None,by=None,img=np.array([]),fit
 
         colors.update({i+len(IDs1)+1: ecw[i] for i,_ in enumerate(IDs2)})
         tp = df[df.Timestep == timepoint]
-        circles = [cv2.circle(bk,center = (round(x/dims[0]*img_size),
-            round(y/dims[1]*img_size)),radius = round(radius/dims[1]*img_size),
+        circles = [cv2.circle(bk,center = (round(x*1e6*px_per_micron),
+            round(y*1e6*px_per_micron)),radius = round(radius*1e6*px_per_micron),
             color = (int(colors[cell][0]),int(colors[cell][1]),int(colors[cell][2])),thickness = -1) for x,y, radius,cell in zip(tp.x,tp.y,tp.radius,tp.mother_cell)]
         if fitness is not None:
             if fitness is True:
@@ -389,21 +390,21 @@ def colony(obj,time,colors=None,colony=None,ax=None,by=None,img=np.array([]),fit
             if isinstance(fitness, pd.DataFrame):
                 # mark center of E. coli colonies
                 tp = df.loc[(df.Timestep == 0) & (df.type==2)]
-                circles = [cv2.circle(bk,center = (round(x/dims[0]*img_size),
-                round(y/dims[1]*img_size)),radius = round(radius/dims[1]*img_size),
+                circles = [cv2.circle(bk,center = (round(x*1e6*px_per_micron),
+                round(y*1e6*px_per_micron)),radius = round(radius*1e6*px_per_micron),
                 color = (0,0,0),thickness = -1) for x,y, radius,cell in zip(tp.x,tp.y,tp.radius,tp.mother_cell)]
 
                 fit_list =fitness.sort_values(by=['total biomass'],ascending=False).loc[fitness.type==2].reset_index(drop=True)['mother_cell'].to_numpy()
                 fit_dict = {x:str(list(fit_list).index(x)+1) for x in fit_list}
-                text = [cv2.putText(bk,fit_dict[cell],org = (round(x/dims[0]*img_size*0.95),
-                round(y/dims[1]*img_size*0.99)),fontFace=cv2.FONT_HERSHEY_SIMPLEX,fontScale=1,color=(0,0,0),thickness = 2) for x,y, cell in zip(tp.x,tp.y,tp.mother_cell)]
+                text = [cv2.putText(bk,fit_dict[cell],org = (round(x*1e6*px_per_micron*0.95),
+                round(y*1e6*px_per_micron*0.99)),fontFace=cv2.FONT_HERSHEY_SIMPLEX,fontScale=1,color=(0,0,0),thickness = 2) for x,y, cell in zip(tp.x,tp.y,tp.mother_cell)]
     elif colony == None and by == None:
         if colors == None:
             IDs = np.sort(df[df.mother_cell != -1].mother_cell.unique())
             colors = {x : tuple(np.random.randint(0,255, 3).astype('int')) for x in IDs}
         tp = df[df.Timestep == timepoint]
-        circles = [cv2.circle(bk,center = (round(x/dims[0]*img_size),
-                    round(y/dims[1]*img_size)),radius = round(radius/dims[1]*img_size),
+        circles = [cv2.circle(bk,center = (round(x*1e6*px_per_micron),
+                    round(y*1e6*px_per_micron)),radius = round(radius*1e6*px_per_micron),
                     color = (int(colors[cell][0]),int(colors[cell][1]),int(colors[cell][2])),thickness = -1) for x,y, radius,cell in zip(tp.x,tp.y,tp.radius,tp.mother_cell)]
 
     elif colony != None:
@@ -421,13 +422,13 @@ def colony(obj,time,colors=None,colony=None,ax=None,by=None,img=np.array([]),fit
 
             colors.update({i+len(IDs1)+1: ecw[i] for i,_ in enumerate(IDs2)})
             tp = df[df.Timestep == timepoint]
-            circles = [cv2.circle(bk,center = (round(x/dims[0]*img_size),
-                round(y/dims[1]*img_size)),radius = round(radius/dims[1]*img_size),
+            circles = [cv2.circle(bk,center = (round(x*1e6*px_per_micron),
+                round(y*1e6*px_per_micron)),radius = round(radius*1e6*px_per_micron),
                 color = (int(colors[cell][0]),int(colors[cell][1]),int(colors[cell][2])),thickness = -1) for x,y, radius,cell in zip(tp.x,tp.y,tp.radius,tp.mother_cell)]
         tp = df[(df.Timestep == timepoint) & (df.mother_cell==colony)]
 
-        circles = [cv2.circle(bk,center = (round(x/dims[0]*img_size),
-                    round(y/dims[1]*img_size)),radius = round(radius/dims[1]*img_size),
+        circles = [cv2.circle(bk,center = (round(x*1e6*px_per_micron),
+                    round(y*1e6*px_per_micron)),radius = round(radius*1e6*px_per_micron),
                     color = (int(color[0]),int(color[1]),int(color[2])),thickness = -1) for x,y, radius,cell in zip(tp.x,tp.y,tp.radius,tp.mother_cell)]
     ax.imshow(bk)
     ax.axes.xaxis.set_visible(False)
