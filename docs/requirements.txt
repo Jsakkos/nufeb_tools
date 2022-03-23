@@ -10,7 +10,6 @@ numpy
 scikit-image
 pandas
 matplotlib
-datafed
 opencv-python
 h5py
 seaborn

@@ -16,7 +16,6 @@ Welcome to the **nufeb_tools** documentation.
 
    atom_generation
    analysis
-   datafed
 
 .. toctree::
   :maxdepth: 3

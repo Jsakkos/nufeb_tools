@@ -61,10 +61,4 @@ then
     exit
 fi
 
-#Upload results to DataFed
-#for dir in runs/*/
-#do
-#cd "$dir"
-#nufeb-upload
-#cd "$base"
-#done
+

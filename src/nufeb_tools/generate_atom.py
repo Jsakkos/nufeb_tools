@@ -7,7 +7,6 @@ import json
 import os
 import sys
 from datetime import date
-from datafed.CommandLib import API
 import logging
 from nufeb_tools import __version__
 from pathlib import Path
@@ -94,13 +93,6 @@ def parse_args(args):
         help="Set seed generation to monolayer of cells",
     )
     parser.add_argument("--u", dest="user", action="store", help="CADES/CNMS user ID")
-    parser.add_argument(
-        "--datafed",
-        dest="datafed",
-        action="store",
-        default=False,
-        help="DataFed Upload",
-    )
     parser.add_argument(
         "--cells",
         dest="cells",
@@ -541,19 +533,7 @@ def main(args):
         x = int(InitialConditions["Dimensions"][0] * 1e6)
         y = int(InitialConditions["Dimensions"][1] * 1e6)
         z = int(InitialConditions["Dimensions"][2] * 1e6)
-        if args.datafed is True or args.datafed == "True":
-            # create DataFed collection to hold the results
-            # TODO actually make this work
-            df_api = API()
-            df_api.setContext("p/eng107")
-            collectionName = f"NUFEB_{n_cyanos}_{n_ecw}_{IPTG:.0e}_{today}_{x}_{y}_{z}"
-            parent_collection = df_api.getAuthUser().split("/")[1]
-            coll_msg = df_api.collectionCreate(
-                collectionName, parent_id=parent_collection
-            )
-            global_coll_id = coll_msg[0].coll[0].id
-        else:
-            global_coll_id = None
+
 
         # write slurm script
         # open the file
@@ -582,7 +562,6 @@ def main(args):
                 "n_cyanos": n_cyanos,
                 "n_ecw": n_ecw,
                 "Reps": args.reps,
-                "id": global_coll_id,
             }
         )
         f = open(RUN_DIR / f"local_{n_cyanos}_{n_ecw}_{SucPct}.sh", "w+")
