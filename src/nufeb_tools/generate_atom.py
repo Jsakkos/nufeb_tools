@@ -206,6 +206,14 @@ def parse_args(args):
         action="store_const",
         const=logging.DEBUG,
     )
+    parser.add_argument(
+        "--niter",
+        dest="niter",
+        action="store",
+        help="Number of iterations for diffusion calculation",
+        type=int,
+        default=1000000,
+    )
     return parser.parse_args(args)
 
 
@@ -226,6 +234,7 @@ def clean():
     """Remove old NUFEB runs"""
     if os.path.isdir("runs"):
         import shutil
+
         # TODO add folder removal to logger
         try:
             shutil.rmtree("runs")
@@ -523,6 +532,7 @@ def main(args):
                 "grid": grid,
                 "masses": masses,
                 "mass_max": f"{max_mass:.2e}",
+                "DiffusionSteps": args.niter,
             }
         )
         f = open(
@@ -533,7 +543,6 @@ def main(args):
         x = int(InitialConditions["Dimensions"][0] * 1e6)
         y = int(InitialConditions["Dimensions"][1] * 1e6)
         z = int(InitialConditions["Dimensions"][2] * 1e6)
-
 
         # write slurm script
         # open the file
