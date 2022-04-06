@@ -330,6 +330,7 @@ def main(args):
             SucRatio = IPTG
         InitialConditions["IPTG"] = IPTG
         InitialConditions["SucRatio"] = SucRatio
+        _logger.info(f"IPTG = {IPTG}")
         SucPct = int(SucRatio * 100)
         mean_cyano_mass = (
             np.mean(
@@ -444,6 +445,12 @@ def main(args):
         InitialConditions["ecw"]["StartingCells"] = n_ecw
         InitialConditions["cyano"]["initial_biomass"] = total_cyano_biomass
         InitialConditions["ecw"]["initial_biomass"] = total_ecw_biomass
+        _logger.info(f"Cyanos = {n_cyanos}")
+        _logger.info(f"Ecw = {n_ecw}")
+        _logger.info(f"Cyano biomass = {total_cyano_biomass} kg")
+        _logger.info(f"Ecw biomass = {total_ecw_biomass} kg")
+        _logger.info(f'Starting Cyano OD {InitialConditions["cyano"]["OD"]}')
+        _logger.info(f'Starting Ecw OD {InitialConditions["ecw"]["OD"]}')
         RUN_DIR = Path(
             f"runs/Run_{n_cyanos}_{n_ecw}_{IPTG:.2e}_{args.reps}_{today}_{random.randint(1,1e6)}"
         )
@@ -484,34 +491,35 @@ def main(args):
                     size=(InitialConditions[CellType]["StartingCells"],),
                 )
                 initial_biomass = InitialConditions[CellType]["initial_biomass"]
-                while not (
-                    0.999 * initial_biomass
-                    < sum(sizes ** 3 / 6 * np.pi * 370)
-                    < 1.001 * initial_biomass
-                ):
-                    sizes = np.random.uniform(
-                        InitialConditions[CellType]["min_size"],
-                        InitialConditions[CellType]["max_size"],
-                        size=(InitialConditions[CellType]["StartingCells"],),
-                    )
-                n = 0
-                for i in range(j, InitialConditions[CellType]["StartingCells"] + j):
-                    size = sizes[n]
-                    x = random.uniform(
-                        0 + size, InitialConditions["Dimensions"][0] - size
-                    )
-                    y = random.uniform(
-                        0 + size, InitialConditions["Dimensions"][1] - size
-                    )
-                    z = random.uniform(
-                        0 + size, InitialConditions["Dimensions"][2] - size
-                    )
-                    L.append(
-                        f'     %d {c} {size :.2e}  {InitialConditions[CellType]["Density"]} {x :.2e} {y :.2e} {z :.2e} {size :.2e} \n'
-                        % (i)
-                    )
-                    j += 1
-                    n += 1
+                if initial_biomass > 0:
+                    while not (
+                        0.999 * initial_biomass
+                        < sum(sizes ** 3 / 6 * np.pi * 370)
+                        < 1.001 * initial_biomass
+                    ):
+                        sizes = np.random.uniform(
+                            InitialConditions[CellType]["min_size"],
+                            InitialConditions[CellType]["max_size"],
+                            size=(InitialConditions[CellType]["StartingCells"],),
+                        )
+                    n = 0
+                    for i in range(j, InitialConditions[CellType]["StartingCells"] + j):
+                        size = sizes[n]
+                        x = random.uniform(
+                            0 + size, InitialConditions["Dimensions"][0] - size
+                        )
+                        y = random.uniform(
+                            0 + size, InitialConditions["Dimensions"][1] - size
+                        )
+                        z = random.uniform(
+                            0 + size, InitialConditions["Dimensions"][2] - size
+                        )
+                        L.append(
+                            f'     %d {c} {size :.2e}  {InitialConditions[CellType]["Density"]} {x :.2e} {y :.2e} {z :.2e} {size :.2e} \n'
+                            % (i)
+                        )
+                        j += 1
+                        n += 1
 
             L.append("\n")
             L.append(" Nutrients \n\n")
