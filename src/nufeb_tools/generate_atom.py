@@ -367,8 +367,8 @@ def main(args):
                 n_cyanos = round(total_cyano_biomass / mean_cyano_mass)
                 total_ecw_biomass = float(args.od.split(",")[1]) * Biomass2OD[1]
                 n_ecw = round(total_ecw_biomass / mean_ecw_mass)
-                InitialConditions["cyano"]["OD"] = float(args.od.split(","))[0]
-                InitialConditions["ecw"]["OD"] = float(args.od.split(","))[1]
+                InitialConditions["cyano"]["OD"] = float(args.od.split(",")[0])
+                InitialConditions["ecw"]["OD"] = float(args.od.split(",")[1])
 
             else:
                 n_cyanos = int(random.uniform(1, 100))
@@ -423,8 +423,8 @@ def main(args):
                 n_cyanos = round(total_cyano_biomass / mean_cyano_mass)
                 total_ecw_biomass = float(args.od.split(",")[1]) * Biomass2OD[1]
                 n_ecw = round(total_ecw_biomass / mean_ecw_mass)
-                InitialConditions["cyano"]["OD"] = float(args.od.split(","))[0]
-                InitialConditions["ecw"]["OD"] = float(args.od.split(","))[1]
+                InitialConditions["cyano"]["OD"] = float(args.od.split(",")[0])
+                InitialConditions["ecw"]["OD"] = float(args.od.split(",")[1])
             else:
                 n_ecw = int(random.uniform(1, 100))
             n_cyanos = 0
