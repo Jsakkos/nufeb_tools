@@ -483,7 +483,12 @@ def main(args):
                     InitialConditions[CellType]["max_size"],
                     size=(InitialConditions[CellType]["StartingCells"],),
                 )
-                while not (0.999 * i < sum(x ** 3 / 6 * np.pi * 370) < 1.001 * i):
+                initial_biomass = InitialConditions[CellType]["initial_biomass"]
+                while not (
+                    0.999 * initial_biomass
+                    < sum(sizes ** 3 / 6 * np.pi * 370)
+                    < 1.001 * initial_biomass
+                ):
                     sizes = np.random.uniform(
                         InitialConditions[CellType]["min_size"],
                         InitialConditions[CellType]["max_size"],
