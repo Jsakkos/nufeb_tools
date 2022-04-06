@@ -101,6 +101,13 @@ def parse_args(args):
         help="Number of cyanobacteria and e.coli to initialize simulation with, `e.g., 100,100. ` Default is random number between 1 and 100.",
     )
     parser.add_argument(
+        "--od",
+        dest="od",
+        action="store",
+        default=None,
+        help="Optical density of cyanobacteria and e.coli to initialize simulation with, `e.g., 0.3,1`",
+    )
+    parser.add_argument(
         "--sucR",
         dest="SucRatio",
         action="store",
@@ -263,7 +270,43 @@ def main(args):
     # molecular weights of co2 and sucrose for unit conversions
     CO2MW = 44.01
     SucMW = 342.3
+    Biomass2OD = np.array([0.28, 0.44]) * np.prod(
+        [float(x) for x in args.dims.split(",")]
+    )  # kg-cells/m^3/OD
     TEMPLATES_DIR = (Path(__file__).parent) / "templates"
+    InitialConditions = {
+        "cyano": {
+            "GrowthRate": args.mu_cya,
+            "min_size": 1.37e-6,
+            "max_size": 1.94e-6,
+            "Density": args.rho_cya,
+            "K_s": {"sub": 3.5e-4, "o2": 2e-4, "suc": 1e-2, "co2": 1.38e-4},
+            "GrowthParams": {"Yield": 0.55, "Maintenance": 0, "Decay": 0},
+        },
+        "ecw": {
+            "GrowthRate": args.mu_ecw,
+            "min_size": 8.8e-7,
+            "max_size": 1.39e-6,
+            "Density": args.rho_ecw,
+            "K_s": {"sub": 0, "o2": 1e-3, "suc": args.ksuc, "co2": 5e-2},
+            "GrowthParams": {"Yield": 0.43, "Maintenance": args.maint_ecw, "Decay": 0,},
+        },
+        "Nutrients": {
+            "Concentration": {
+                "sub": 1e-1,
+                "o2": 9e-3,
+                "suc": float(args.sucrose) * SucMW * 1e-3,
+                "co2": float(args.co2) * CO2MW * 1e-3,
+            },
+            "State": {"sub": "g", "o2": "l", "suc": "l", "co2": "l"},
+            "xbc": {"sub": "nn", "o2": "nn", "suc": "nn", "co2": "nn"},
+            "ybc": {"sub": "nn", "o2": "nn", "suc": "nn", "co2": "nn"},
+            "zbc": {"sub": "nn", "o2": "nd", "suc": "nn", "co2": "nd"},
+        },
+        "Diff_c": {"sub": 0, "o2": 2.30e-9, "suc": 5.2e-10, "co2": 1.9e-09},
+        "Dimensions": [float(x) for x in args.dims.split(",")],
+        "Replicates": int(args.reps),
+    }
     # check for runs folder
     if not os.path.isdir("runs"):
         os.mkdir("runs")
@@ -281,21 +324,59 @@ def main(args):
         if args.iptg is not None:
             IPTG = float(args.iptg)
             SucRatio = IPTG
+
         else:
             IPTG = np.round(loguniform.rvs(1e-3, 1e0, size=1)[0], 5)
             SucRatio = IPTG
-        # if args.SucRatio is not None:
-        #    SucRatio = float(args.SucRatio)
-
+        InitialConditions["IPTG"] = IPTG
+        InitialConditions["SucRatio"] = SucRatio
         SucPct = int(SucRatio * 100)
+        mean_cyano_mass = (
+            np.mean(
+                [
+                    (InitialConditions["cyano"]["min_size"]) ** 3,
+                    (InitialConditions["cyano"]["max_size"]) ** 3,
+                ]
+            )
+            / 6
+            * np.pi
+            * 370
+        )
+        mean_ecw_mass = (
+            np.mean(
+                [
+                    (InitialConditions["ecw"]["min_size"]) ** 3,
+                    (InitialConditions["ecw"]["max_size"]) ** 3,
+                ]
+            )
+            / 6
+            * np.pi
+            * 370
+        )
         if args.culture_type == "co":
             cell_types = ["cyano", "ecw"]
             if args.cells is not None:
                 n_cyanos = int(args.cells.split(",")[0])
                 n_ecw = int(args.cells.split(",")[1])
+                total_cyano_biomass = n_cyanos * mean_cyano_mass
+                total_ecw_biomass = n_ecw * mean_ecw_mass
+                InitialConditions["cyano"]["OD"] = total_cyano_biomass / Biomass2OD[0]
+                InitialConditions["ecw"]["OD"] = total_ecw_biomass / Biomass2OD[1]
+            elif args.od is not None:
+                total_cyano_biomass = float(args.od.split(","))[0] * Biomass2OD[0]
+                n_cyanos = round(total_cyano_biomass / mean_cyano_mass)
+                total_ecw_biomass = float(args.od.split(","))[1] * Biomass2OD[1]
+                n_ecw = round(total_ecw_biomass / mean_ecw_mass)
+                InitialConditions["cyano"]["OD"] = float(args.od.split(","))[0]
+                InitialConditions["ecw"]["OD"] = float(args.od.split(","))[1]
+
             else:
                 n_cyanos = int(random.uniform(1, 100))
                 n_ecw = int(random.uniform(1, 100))
+                total_cyano_biomass = n_cyanos * mean_cyano_mass
+                total_ecw_biomass = n_ecw * mean_ecw_mass
+                InitialConditions["cyano"]["OD"] = total_cyano_biomass / Biomass2OD[0]
+                InitialConditions["ecw"]["OD"] = total_ecw_biomass / Biomass2OD[1]
             n_cells = n_cyanos + n_ecw
             cyGroup = "group CYANO type 1"
             ecwGroup = "group ECW type 2"
@@ -311,10 +392,21 @@ def main(args):
             cell_types = ["cyano"]
             if args.cells is not None:
                 n_cyanos = int(args.cells.split(",")[0])
+            elif args.od is not None:
+                total_cyano_biomass = float(args.od.split(","))[0] * Biomass2OD[0]
+                n_cyanos = round(total_cyano_biomass / mean_cyano_mass)
+                total_ecw_biomass = float(args.od.split(","))[1] * Biomass2OD[1]
+                n_ecw = round(total_ecw_biomass / mean_ecw_mass)
+                InitialConditions["cyano"]["OD"] = float(args.od.split(","))[0]
+                InitialConditions["ecw"]["OD"] = float(args.od.split(","))[1]
             else:
                 n_cyanos = int(random.uniform(1, 100))
             n_ecw = 0
             n_cells = n_cyanos
+            total_cyano_biomass = n_cyanos * mean_cyano_mass
+            total_ecw_biomass = n_ecw * mean_ecw_mass
+            InitialConditions["cyano"]["OD"] = total_cyano_biomass / Biomass2OD[0]
+            InitialConditions["ecw"]["OD"] = total_ecw_biomass / Biomass2OD[1]
             cyGroup = "group CYANO type 1"
             ecwGroup = ""
             cyDiv = (
@@ -326,10 +418,21 @@ def main(args):
             cell_types = ["ecw"]
             if args.cells is not None:
                 n_ecw = int(args.cells.split(",")[1])
+            elif args.od is not None:
+                total_cyano_biomass = float(args.od.split(","))[0] * Biomass2OD[0]
+                n_cyanos = round(total_cyano_biomass / mean_cyano_mass)
+                total_ecw_biomass = float(args.od.split(","))[1] * Biomass2OD[1]
+                n_ecw = round(total_ecw_biomass / mean_ecw_mass)
+                InitialConditions["cyano"]["OD"] = float(args.od.split(","))[0]
+                InitialConditions["ecw"]["OD"] = float(args.od.split(","))[1]
             else:
                 n_ecw = int(random.uniform(1, 100))
             n_cyanos = 0
             n_cells = n_ecw
+            total_cyano_biomass = n_cyanos * mean_cyano_mass
+            total_ecw_biomass = n_ecw * mean_ecw_mass
+            InitialConditions["cyano"]["OD"] = total_cyano_biomass / Biomass2OD[0]
+            InitialConditions["ecw"]["OD"] = total_ecw_biomass / Biomass2OD[1]
             cyGroup = ""
             ecwGroup = "group ECW type 1"
             cyDiv = ""
@@ -337,53 +440,17 @@ def main(args):
                 f"fix d2 ECW divide 100 v_EPSdens v_divDia2 {random.randint(1,1e6)}"
             )
             masses = "c_myMass[1]"
+        InitialConditions["cyano"]["StartingCells"] = n_cyanos
+        InitialConditions["ecw"]["StartingCells"] = n_ecw
+        InitialConditions["cyano"]["initial_biomass"] = total_cyano_biomass
+        InitialConditions["ecw"]["initial_biomass"] = total_ecw_biomass
         RUN_DIR = Path(
             f"runs/Run_{n_cyanos}_{n_ecw}_{IPTG:.2e}_{args.reps}_{today}_{random.randint(1,1e6)}"
         )
         if not os.path.isdir(RUN_DIR):
             os.mkdir(RUN_DIR)
         # TODO embed cell type into metadata file and generate cell type programmatically
-        InitialConditions = {
-            "cyano": {
-                "StartingCells": n_cyanos,
-                "GrowthRate": args.mu_cya,
-                "min_size": 1.37e-6,
-                "max_size": 1.94e-6,
-                "Density": args.rho_cya,
-                "K_s": {"sub": 3.5e-4, "o2": 2e-4, "suc": 1e-2, "co2": 1.38e-4},
-                "GrowthParams": {"Yield": 0.55, "Maintenance": 0, "Decay": 0},
-            },
-            "ecw": {
-                "StartingCells": n_ecw,
-                "GrowthRate": args.mu_ecw,
-                "min_size": 8.8e-7,
-                "max_size": 1.39e-6,
-                "Density": args.rho_ecw,
-                "K_s": {"sub": 0, "o2": 1e-3, "suc": args.ksuc, "co2": 5e-2},
-                "GrowthParams": {
-                    "Yield": 0.43,
-                    "Maintenance": args.maint_ecw,
-                    "Decay": 0,
-                },
-            },
-            "Nutrients": {
-                "Concentration": {
-                    "sub": 1e-1,
-                    "o2": 9e-3,
-                    "suc": float(args.sucrose) * SucMW * 1e-3,
-                    "co2": float(args.co2) * CO2MW * 1e-3,
-                },
-                "State": {"sub": "g", "o2": "l", "suc": "l", "co2": "l"},
-                "xbc": {"sub": "nn", "o2": "nn", "suc": "nn", "co2": "nn"},
-                "ybc": {"sub": "nn", "o2": "nn", "suc": "nn", "co2": "nn"},
-                "zbc": {"sub": "nn", "o2": "nd", "suc": "nn", "co2": "nd"},
-            },
-            "Diff_c": {"sub": 0, "o2": 2.30e-9, "suc": 5.2e-10, "co2": 1.9e-09},
-            "Dimensions": [float(x) for x in args.dims.split(",")],
-            "SucRatio": SucRatio,
-            "IPTG": IPTG,
-            "Replicates": int(args.reps),
-        }
+
         grids = int(args.grid)
         while True:
             if (
@@ -411,11 +478,20 @@ def main(args):
 
             j = 1
             for c, CellType in enumerate(cell_types, start=1):
-                for i in range(j, InitialConditions[CellType]["StartingCells"] + j):
-                    size = random.uniform(
+                sizes = np.random.uniform(
+                    InitialConditions[CellType]["min_size"],
+                    InitialConditions[CellType]["max_size"],
+                    size=(InitialConditions[CellType]["StartingCells"],),
+                )
+                while not (0.999 * i < sum(x ** 3 / 6 * np.pi * 370) < 1.001 * i):
+                    sizes = np.random.uniform(
                         InitialConditions[CellType]["min_size"],
                         InitialConditions[CellType]["max_size"],
+                        size=(InitialConditions[CellType]["StartingCells"],),
                     )
+                n = 0
+                for i in range(j, InitialConditions[CellType]["StartingCells"] + j):
+                    size = sizes[n]
                     x = random.uniform(
                         0 + size, InitialConditions["Dimensions"][0] - size
                     )
@@ -430,6 +506,7 @@ def main(args):
                         % (i)
                     )
                     j += 1
+                    n += 1
 
             L.append("\n")
             L.append(" Nutrients \n\n")
