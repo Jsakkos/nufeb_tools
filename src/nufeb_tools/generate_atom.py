@@ -363,9 +363,9 @@ def main(args):
                 InitialConditions["cyano"]["OD"] = total_cyano_biomass / Biomass2OD[0]
                 InitialConditions["ecw"]["OD"] = total_ecw_biomass / Biomass2OD[1]
             elif args.od is not None:
-                total_cyano_biomass = float(args.od.split(","))[0] * Biomass2OD[0]
+                total_cyano_biomass = float(args.od.split(",")[0]) * Biomass2OD[0]
                 n_cyanos = round(total_cyano_biomass / mean_cyano_mass)
-                total_ecw_biomass = float(args.od.split(","))[1] * Biomass2OD[1]
+                total_ecw_biomass = float(args.od.split(",")[1]) * Biomass2OD[1]
                 n_ecw = round(total_ecw_biomass / mean_ecw_mass)
                 InitialConditions["cyano"]["OD"] = float(args.od.split(","))[0]
                 InitialConditions["ecw"]["OD"] = float(args.od.split(","))[1]
@@ -393,9 +393,9 @@ def main(args):
             if args.cells is not None:
                 n_cyanos = int(args.cells.split(",")[0])
             elif args.od is not None:
-                total_cyano_biomass = float(args.od.split(","))[0] * Biomass2OD[0]
+                total_cyano_biomass = float(args.od.split(",")[0]) * Biomass2OD[0]
                 n_cyanos = round(total_cyano_biomass / mean_cyano_mass)
-                total_ecw_biomass = float(args.od.split(","))[1] * Biomass2OD[1]
+                total_ecw_biomass = float(args.od.split(",")[1]) * Biomass2OD[1]
                 n_ecw = round(total_ecw_biomass / mean_ecw_mass)
                 InitialConditions["cyano"]["OD"] = float(args.od.split(","))[0]
                 InitialConditions["ecw"]["OD"] = float(args.od.split(","))[1]
@@ -419,9 +419,9 @@ def main(args):
             if args.cells is not None:
                 n_ecw = int(args.cells.split(",")[1])
             elif args.od is not None:
-                total_cyano_biomass = float(args.od.split(","))[0] * Biomass2OD[0]
+                total_cyano_biomass = float(args.od.split(",")[0]) * Biomass2OD[0]
                 n_cyanos = round(total_cyano_biomass / mean_cyano_mass)
-                total_ecw_biomass = float(args.od.split(","))[1] * Biomass2OD[1]
+                total_ecw_biomass = float(args.od.split(",")[1]) * Biomass2OD[1]
                 n_ecw = round(total_ecw_biomass / mean_ecw_mass)
                 InitialConditions["cyano"]["OD"] = float(args.od.split(","))[0]
                 InitialConditions["ecw"]["OD"] = float(args.od.split(","))[1]
