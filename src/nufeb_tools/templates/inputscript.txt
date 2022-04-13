@@ -7,7 +7,7 @@ newton		off
 processors  * * 1
 
 comm_modify	vel yes
-read_data_bio atom_${n_cyanos}_${n_ecw}_${IPTG}_${Replicates}_${date}.in
+read_data_bio ${atom_file_path}
 ##############Define initial particle distribution##############
 
 lattice sc 1e-6 origin 0 0 0

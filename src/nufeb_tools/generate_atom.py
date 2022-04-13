@@ -565,9 +565,7 @@ def main(args):
             L.append("\n\n")
 
             # write atom definition file
-            f = open(
-                RUN_DIR / f"atom_{n_cyanos}_{n_ecw}_{IPTG:.0e}_{r}_{today}.in", "w+"
-            )
+            f = open(RUN_DIR / "atom.in", "w+")
             f.writelines(L)
 
         # write initial conditions json file
@@ -576,7 +574,7 @@ def main(args):
         dumpfile.close()
         # write Inputscript
         # open the file
-
+        atom_file_path = RUN_DIR.resolve() / "atom.in"
         if args.lammps == True:
             lammps = "dump    id all custom 100 output.lammmps id type diameter x y z"
         else:
@@ -623,11 +621,10 @@ def main(args):
                 "masses": masses,
                 "mass_max": f"{max_mass:.2e}",
                 "DiffusionSteps": args.niter,
+                "atom_file_path": atom_file_path,
             }
         )
-        f = open(
-            RUN_DIR / f"Inputscript_{n_cyanos}_{n_ecw}_{IPTG:.0e}_{today}.lammps", "w+"
-        )
+        f = open(RUN_DIR / f"Inputscript.lammps", "w+")
         f.writelines(result)
 
         x = int(InitialConditions["Dimensions"][0] * 1e6)
