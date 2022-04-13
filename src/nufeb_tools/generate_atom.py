@@ -134,7 +134,7 @@ def parse_args(args):
         "--mucya",
         dest="mu_cya",
         action="store",
-        default=1.89e-5,
+        default=1.802e-5,
         type=float,
         help="S. elongatus maximum growth rate",
     )
