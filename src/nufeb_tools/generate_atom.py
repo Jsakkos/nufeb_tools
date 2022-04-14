@@ -164,11 +164,27 @@ def parse_args(args):
     )
     parser.add_argument(
         "--maintecw",
-        dest="maint_ecw",
+        dest="ecw_maint",
         action="store",
         default=9.50e-7,
         type=float,
         help="E. coli W maintenance cost",
+    )
+    parser.add_argument(
+        "--yieldecw",
+        dest="ecw_yield",
+        action="store",
+        default=0.43,
+        type=float,
+        help="E. coli W biomass yield (g-dw/g-sucrose)",
+    )
+    parser.add_argument(
+        "--decayecw",
+        dest="ecw_decay",
+        action="store",
+        default=0,
+        type=float,
+        help="E. coli W decay rate",
     )
     parser.add_argument(
         "--mass",
@@ -289,7 +305,11 @@ def main(args):
             "max_size": 1.39e-6,
             "Density": args.rho_ecw,
             "K_s": {"sub": 0, "o2": 1e-3, "suc": args.ksuc, "co2": 5e-2},
-            "GrowthParams": {"Yield": 0.43, "Maintenance": args.maint_ecw, "Decay": 0,},
+            "GrowthParams": {
+                "Yield": args.ecw_yield,
+                "Maintenance": args.ecw_maint,
+                "Decay": args.ecw_decay,
+            },
         },
         "Nutrients": {
             "Concentration": {
