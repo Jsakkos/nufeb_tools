@@ -187,6 +187,14 @@ def parse_args(args):
         help="E. coli W decay rate",
     )
     parser.add_argument(
+        "--biodt",
+        dest="biodt",
+        action="store",
+        default=100,
+        type=int,
+        help="Biological timesteps.",
+    )
+    parser.add_argument(
         "--mass",
         dest="mass_max",
         action="store",
@@ -401,12 +409,8 @@ def main(args):
             n_cells = n_cyanos + n_ecw
             cyGroup = "group CYANO type 1"
             ecwGroup = "group ECW type 2"
-            cyDiv = (
-                f"fix d1 CYANO divide 100 v_EPSdens v_divDia1 {random.randint(1,1e6)}"
-            )
-            ecwDiv = (
-                f"fix d2 ECW divide 100 v_EPSdens v_divDia2 {random.randint(1,1e6)}"
-            )
+            cyDiv = f"fix d1 CYANO divide {args.biodt} v_EPSdens v_divDia1 {random.randint(1,1e6)}"
+            ecwDiv = f"fix d2 ECW divide {args.biodt} v_EPSdens v_divDia2 {random.randint(1,1e6)}"
             masses = "c_myMass[1]+c_myMass[2]"
 
         elif args.culture_type == "ax-c":
@@ -430,9 +434,7 @@ def main(args):
             InitialConditions["ecw"]["OD"] = total_ecw_biomass / Biomass2OD[1]
             cyGroup = "group CYANO type 1"
             ecwGroup = ""
-            cyDiv = (
-                f"fix d1 CYANO divide 100 v_EPSdens v_divDia1 {random.randint(1,1e6)}"
-            )
+            cyDiv = f"fix d1 CYANO divide {args.biodt} v_EPSdens v_divDia1 {random.randint(1,1e6)}"
             ecwDiv = ""
             masses = "c_myMass[1]"
         elif args.culture_type == "ax-e":
@@ -457,9 +459,7 @@ def main(args):
             cyGroup = ""
             ecwGroup = "group ECW type 1"
             cyDiv = ""
-            ecwDiv = (
-                f"fix d2 ECW divide 100 v_EPSdens v_divDia2 {random.randint(1,1e6)}"
-            )
+            ecwDiv = f"fix d2 ECW divide {args.biodt} v_EPSdens v_divDia2 {random.randint(1,1e6)}"
             masses = "c_myMass[1]"
         InitialConditions["cyano"]["StartingCells"] = n_cyanos
         InitialConditions["ecw"]["StartingCells"] = n_ecw
@@ -642,6 +642,7 @@ def main(args):
                 "mass_max": f"{max_mass:.2e}",
                 "DiffusionSteps": args.niter,
                 "atom_file_path": atom_file_path,
+                "biodt": args.biodt,
             }
         )
         f = open(RUN_DIR / f"Inputscript.lammps", "w+")
