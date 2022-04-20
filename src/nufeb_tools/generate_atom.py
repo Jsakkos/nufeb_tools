@@ -245,6 +245,13 @@ def parse_args(args):
         type=int,
         default=1000000,
     )
+    parser.add_argument(
+        "--suc_halt",
+        dest="sucrose_halt",
+        default=False,
+        type=bool,
+        help="Add halt condition for sucrose levels.",
+    )
     return parser.parse_args(args)
 
 
@@ -613,6 +620,11 @@ def main(args):
             vtk = ""
             grid = ""
             vtk_tarball = "false"
+        if args.sucrose_halt == True:
+            suc_halt = "fix h2 all halt 1000 v_suc <= 1e-19"
+        else:
+            suc_halt = ""
+
         filein = open(TEMPLATES_DIR / "inputscript.txt")
         # read it
         src = Template(filein.read())
@@ -643,6 +655,7 @@ def main(args):
                 "DiffusionSteps": args.niter,
                 "atom_file_path": atom_file_path,
                 "biodt": args.biodt,
+                "sucrose_halt": suc_halt,
             }
         )
         f = open(RUN_DIR / f"Inputscript.lammps", "w+")

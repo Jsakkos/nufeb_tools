@@ -76,6 +76,9 @@ compute myCon all avg_con
 variable co2 equal c_myCon[4]
 fix 10 all halt 1000 v_co2 <= 1e-19
 
+variable suc equal c_myCon[3]
+${sucrose_halt}
+
 variable light equal c_myCon[1]
 fix 11 all halt 1000 v_light <= 1e-19
 
