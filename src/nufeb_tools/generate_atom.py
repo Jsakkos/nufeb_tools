@@ -252,6 +252,9 @@ def parse_args(args):
         type=bool,
         help="Add halt condition for sucrose levels.",
     )
+    parser.add_argument(
+        "--division", dest="division", dest=True, type=bool, help="Cellular division"
+    )
     return parser.parse_args(args)
 
 
@@ -416,8 +419,12 @@ def main(args):
             n_cells = n_cyanos + n_ecw
             cyGroup = "group CYANO type 1"
             ecwGroup = "group ECW type 2"
-            cyDiv = f"fix d1 CYANO divide {args.biodt} v_EPSdens v_divDia1 {random.randint(1,1e6)}"
-            ecwDiv = f"fix d2 ECW divide {args.biodt} v_EPSdens v_divDia2 {random.randint(1,1e6)}"
+            if args.division is True:
+                cyDiv = f"fix d1 CYANO divide {args.biodt} v_EPSdens v_divDia1 {random.randint(1,1e6)}"
+                ecwDiv = f"fix d2 ECW divide {args.biodt} v_EPSdens v_divDia2 {random.randint(1,1e6)}"
+            else:
+                cyDiv = ""
+                ecwDiv = ""
             masses = "c_myMass[1]+c_myMass[2]"
 
         elif args.culture_type == "ax-c":
@@ -441,7 +448,10 @@ def main(args):
             InitialConditions["ecw"]["OD"] = total_ecw_biomass / Biomass2OD[1]
             cyGroup = "group CYANO type 1"
             ecwGroup = ""
-            cyDiv = f"fix d1 CYANO divide {args.biodt} v_EPSdens v_divDia1 {random.randint(1,1e6)}"
+            if args.division is True:
+                cyDiv = f"fix d1 CYANO divide {args.biodt} v_EPSdens v_divDia1 {random.randint(1,1e6)}"
+            else:
+                cyDiv = ""
             ecwDiv = ""
             masses = "c_myMass[1]"
         elif args.culture_type == "ax-e":
@@ -466,7 +476,10 @@ def main(args):
             cyGroup = ""
             ecwGroup = "group ECW type 1"
             cyDiv = ""
-            ecwDiv = f"fix d2 ECW divide {args.biodt} v_EPSdens v_divDia2 {random.randint(1,1e6)}"
+            if args.division is True:
+                ecwDiv = f"fix d2 ECW divide {args.biodt} v_EPSdens v_divDia2 {random.randint(1,1e6)}"
+            else:
+                ecwDiv = ""
             masses = "c_myMass[1]"
         InitialConditions["cyano"]["StartingCells"] = n_cyanos
         InitialConditions["ecw"]["StartingCells"] = n_ecw
