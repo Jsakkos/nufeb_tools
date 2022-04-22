@@ -80,7 +80,7 @@ variable suc equal c_myCon[3]
 ${sucrose_halt}
 
 variable light equal c_myCon[1]
-fix 11 all halt 1000 v_light <= 1e-19
+fix hl all halt 1000 v_light <= 1e-19
 
 variable mass equal ${masses}
 fix my_halt all halt 1 v_mass >= ${mass_max}

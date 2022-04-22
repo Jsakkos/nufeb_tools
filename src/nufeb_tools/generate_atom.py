@@ -253,7 +253,7 @@ def parse_args(args):
         help="Add halt condition for sucrose levels.",
     )
     parser.add_argument(
-        "--division", dest="division", default=True, type=bool, help="Cellular division"
+        "--division", dest="division", default="on", type=str, help="Cellular division"
     )
     return parser.parse_args(args)
 
@@ -419,7 +419,7 @@ def main(args):
             n_cells = n_cyanos + n_ecw
             cyGroup = "group CYANO type 1"
             ecwGroup = "group ECW type 2"
-            if args.division is True:
+            if args.division.lower() == "on":
                 cyDiv = f"fix d1 CYANO divide {args.biodt} v_EPSdens v_divDia1 {random.randint(1,1e6)}"
                 ecwDiv = f"fix d2 ECW divide {args.biodt} v_EPSdens v_divDia2 {random.randint(1,1e6)}"
             else:
@@ -448,7 +448,7 @@ def main(args):
             InitialConditions["ecw"]["OD"] = total_ecw_biomass / Biomass2OD[1]
             cyGroup = "group CYANO type 1"
             ecwGroup = ""
-            if args.division is True:
+            if args.division.lower() == "on":
                 cyDiv = f"fix d1 CYANO divide {args.biodt} v_EPSdens v_divDia1 {random.randint(1,1e6)}"
             else:
                 cyDiv = ""
@@ -476,7 +476,7 @@ def main(args):
             cyGroup = ""
             ecwGroup = "group ECW type 1"
             cyDiv = ""
-            if args.division is True:
+            if args.division.lower() == "on":
                 ecwDiv = f"fix d2 ECW divide {args.biodt} v_EPSdens v_divDia2 {random.randint(1,1e6)}"
             else:
                 ecwDiv = ""
@@ -634,7 +634,7 @@ def main(args):
             grid = ""
             vtk_tarball = "false"
         if args.sucrose_halt is not None:
-            suc_halt = f"fix h2 all {args.sucrose_halt} 1000 v_suc <= 1e-19"
+            suc_halt = f"fix h2 all halt {args.sucrose_halt} v_suc <= 1e-19"
         else:
             suc_halt = ""
 
@@ -709,6 +709,8 @@ def main(args):
         )
         f = open(RUN_DIR / f"local_{n_cyanos}_{n_ecw}_{SucPct}.sh", "w+")
         f.writelines(result)
+        for arg in vars(args):
+            _logger.info(f"{arg}={getattr(args, arg)}")
 
         _logger.info("Script ends here")
 
