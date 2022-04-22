@@ -253,7 +253,7 @@ def parse_args(args):
         help="Add halt condition for sucrose levels.",
     )
     parser.add_argument(
-        "--division", dest="division", dest=True, type=bool, help="Cellular division"
+        "--division", dest="division", default=True, type=bool, help="Cellular division"
     )
     return parser.parse_args(args)
 
