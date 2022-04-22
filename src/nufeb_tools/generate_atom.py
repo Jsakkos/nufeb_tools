@@ -248,8 +248,8 @@ def parse_args(args):
     parser.add_argument(
         "--suc_halt",
         dest="sucrose_halt",
-        default=False,
-        type=bool,
+        default=None,
+        type=int,
         help="Add halt condition for sucrose levels.",
     )
     parser.add_argument(
@@ -633,8 +633,8 @@ def main(args):
             vtk = ""
             grid = ""
             vtk_tarball = "false"
-        if args.sucrose_halt == True:
-            suc_halt = "fix h2 all halt 1000 v_suc <= 1e-19"
+        if args.sucrose_halt is not None:
+            suc_halt = f"fix h2 all {args.sucrose_halt} 1000 v_suc <= 1e-19"
         else:
             suc_halt = ""
 
