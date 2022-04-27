@@ -126,7 +126,7 @@ def parse_args(args):
         "--muecw",
         dest="mu_ecw",
         action="store",
-        default=6.71e-5,
+        default=3.55e-4,
         type=float,
         help="E. coli W maximum growth rate",
     )
@@ -166,7 +166,7 @@ def parse_args(args):
         "--maintecw",
         dest="ecw_maint",
         action="store",
-        default=9.50e-7,
+        default=0,
         type=float,
         help="E. coli W maintenance cost",
     )
@@ -174,7 +174,7 @@ def parse_args(args):
         "--yieldecw",
         dest="ecw_yield",
         action="store",
-        default=0.43,
+        default=0.49,
         type=float,
         help="E. coli W biomass yield (g-dw/g-sucrose)",
     )
