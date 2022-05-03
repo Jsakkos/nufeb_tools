@@ -155,6 +155,14 @@ def parse_args(args):
         help="S. elongatus cell density",
     )
     parser.add_argument(
+        "--kco2",
+        dest="kco2",
+        action="store",
+        default=0.00812672,
+        type=float,
+        help="S. elongatus Kco2",
+    )
+    parser.add_argument(
         "--ksuc",
         dest="ksuc",
         action="store",
@@ -314,7 +322,7 @@ def main(args):
             "min_size": 1.37e-6,
             "max_size": 1.94e-6,
             "Density": args.rho_cya,
-            "K_s": {"sub": 3.5e-4, "o2": 2e-4, "suc": 1e-2, "co2": 1.38e-4},
+            "K_s": {"sub": 3.5e-4, "o2": 2e-4, "suc": 1e-2, "co2": args.kco2},
             "GrowthParams": {"Yield": 0.55, "Maintenance": 0, "Decay": 0},
         },
         "ecw": {
