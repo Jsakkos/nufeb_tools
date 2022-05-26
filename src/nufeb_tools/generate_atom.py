@@ -90,6 +90,7 @@ def parse_args(args):
         dest="monolayer",
         action="store",
         default=True,
+        type=bool,
         help="Set seed generation to monolayer of cells",
     )
     parser.add_argument("--u", dest="user", action="store", help="CADES/CNMS user ID")
@@ -559,9 +560,12 @@ def main(args):
                         y = random.uniform(
                             0 + size, InitialConditions["Dimensions"][1] - size
                         )
-                        z = random.uniform(
-                            0 + size, InitialConditions["Dimensions"][2] - size
-                        )
+                        if args.monolayer is True:
+                            z = size
+                        else:
+                            z = random.uniform(
+                                0 + size, InitialConditions["Dimensions"][2] - size
+                            )
                         L.append(
                             f'     %d {c} {size :.2e}  {InitialConditions[CellType]["Density"]} {x :.2e} {y :.2e} {z :.2e} {size :.2e} \n'
                             % (i)
