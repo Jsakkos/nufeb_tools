@@ -314,6 +314,12 @@ class get_data:
         df["total_biomass"] = df.groupby(["mother_cell", "Timestep"]).cumsum()[
             "biomass"
         ]
+        df["total_biomass2"] = (
+        df.loc[df.Timestep == df.Timestep.iloc[-1]]
+        .groupby("mother_cell")
+        .sum()
+        .reset_index()["biomass"]
+    )
         self.colonies = df
 
     def count_colony_area(self, timestep):
