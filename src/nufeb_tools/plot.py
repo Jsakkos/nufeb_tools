@@ -421,24 +421,36 @@ def colony(
         bk = img
     if by == "Species" or by == "species" or by == "type":
         if fitness is True:
-            if not hasattr(obj, "colonies"):
-                obj.get_mothers()
             fitness = obj.colonies
-            sorted = fitness[['mother_cell','total_biomass']].dropna().sort_values(by=['total_biomass']).reset_index(drop=True)
             colors = dict()
-            IDs1 = df[['mother_cell','total_biomass']].dropna().sort_values(by=['total_biomass']).reset_index(drop=True).loc[df.type == 1].mother_cell.unique()
+            IDs1 = (
+                df[["mother_cell", "total_biomass"]]
+                .dropna()
+                .loc[df.type == 1]
+                .sort_values(by=["total_biomass"], ascending=False)
+                .reset_index(drop=True)
+                .mother_cell.unique()
+            )
             cya = colorFaderRGB("#01665e", "#c7eae5", len(IDs1))
-
-            colors.update({i + 1: cya[i] for i, _ in enumerate(IDs1)})
-            IDs2 = df[['mother_cell','total_biomass']].dropna().sort_values(by=['total_biomass']).reset_index(drop=True).loc[df.type == 2].mother_cell.unique()
+            colors.update({id: cya[i] for i, id in enumerate(IDs1)})
+            IDs2 = (
+                df[["mother_cell", "total_biomass"]]
+                .dropna()
+                .loc[df.type == 2]
+                .sort_values(by=["total_biomass"], ascending=False)
+                .reset_index(drop=True)
+                .mother_cell.unique()
+            )
             ecw = colorFaderRGB("#8c510a", "#f6e8c3", len(IDs2))
-
-            colors.update({i + len(IDs1) + 1: ecw[i] for i, _ in enumerate(IDs2)})
+            colors.update({id: ecw[i] for i, id in enumerate(IDs2)})
             tp = df[df.Timestep == timepoint]
             circles = [
                 cv2.circle(
                     bk,
-                    center=(round(x * 1e6 * px_per_micron), round(y * 1e6 * px_per_micron)),
+                    center=(
+                        round(x * 1e6 * px_per_micron),
+                        round(y * 1e6 * px_per_micron),
+                    ),
                     radius=round(radius * 1e6 * px_per_micron),
                     color=(
                         int(colors[cell][0]),
@@ -502,7 +514,10 @@ def colony(
                 circles = [
                     cv2.circle(
                         bk,
-                        center=(round(x * 1e6 * px_per_micron), round(y * 1e6 * px_per_micron)),
+                        center=(
+                            round(x * 1e6 * px_per_micron),
+                            round(y * 1e6 * px_per_micron),
+                        ),
                         radius=round(radius * 1e6 * px_per_micron),
                         color=(
                             int(colors[cell][0]),
