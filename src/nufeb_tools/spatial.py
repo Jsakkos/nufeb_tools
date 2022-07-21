@@ -198,7 +198,7 @@ def fitness_metrics(obj):
     df3.loc[:, "Inv2"] = inv2
     df3.loc[:, "Log Inv1"] = log_inv1
     df3.loc[:, "Log Inv2"] = log_inv2
-
+    xy = df.loc[df.Timestep==0,['mother_cell','x','y']]
     colony_area = df[df.Timestep == obj.Timesteps[-1]][
         ["mother_cell", "Colony Area"]
     ].drop_duplicates()
@@ -207,4 +207,5 @@ def fitness_metrics(obj):
     metrics = metrics.merge(df3, on="mother_cell")
     metrics = metrics.merge(colony_area, on="mother_cell")
     metrics = metrics.merge(initial_biomass, on="mother_cell")
+    metrics = metrics.merge(xy, on="mother_cell")
     return metrics
